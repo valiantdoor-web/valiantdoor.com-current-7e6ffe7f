@@ -18,9 +18,10 @@ Updated on May 26, 2026.
 - Business type: Garage door service company
 - Primary local anchor: Pleasanton, CA 94588
 - Service model: service-area business with Pleasanton as the home base
-- Geo coordinates used in site schema: 37.702032100000004, -121.8674688
+- Geo coordinates used in site schema: 37.6980775, -121.8631748
 - Booking URL: https://book.housecallpro.com/book/Valiant-Garage-Door/ae8e4a137c8c49b4b264073541533a7a?v2=true
 - Quote page: https://www.valiantdoor.com/quote
+- Infinity Shield dealer and installation page: https://www.valiantdoor.com/infinity-shield-garage-door-sensor
 
 ## Official business summary
 Valiant Garage Door is Pleasanton-based, serving Danville, Fremont, Sunol, and surrounding areas with garage door repair, emergency service, spring replacement, openers, complex systems, and precision system upgrades. The company is known for fast response, honest pricing, clear long-term solutions, and repair-first service.

@@ -62,6 +62,23 @@ const BUSINESS_PROFILE = {
     'Garage door maintenance and tune-ups',
     'Commercial garage door service'
   ],
+  dealerProducts: [
+    {
+      name: 'Infinity Shield Garage Door Sensor',
+      relationship: 'Dealer and installer',
+      url: 'https://www.valiantdoor.com/infinity-shield-garage-door-sensor',
+      manufacturerUrl: 'https://infinity-shield.com/products/infinity-shield',
+      facts: [
+        '25 infrared beams',
+        '3.5–71.5 inches of vertical detection coverage',
+        '8–18 foot supported door widths',
+        '450 ms manufacturer-listed response time',
+        'Powered by the opener through existing sensor wires',
+        'Optional parking-assistance beeper',
+        'UL-recognized and tested to UL 325, per manufacturer'
+      ]
+    }
+  ],
   guarantees: {
     warranty: 'Lifetime warranty on installed parts and 10-year warranty on spring replacement, backed by the Valiant Standard of Excellence.',
     emergencyAvailability: 'Urgent requests are accepted by phone 24/7; dispatch timing is confirmed based on technician, route, and parts availability.',
@@ -74,6 +91,7 @@ const BUSINESS_PROFILE = {
     emergency: 'https://www.valiantdoor.com/emergency-garage-door-repair',
     pleasanton: 'https://www.valiantdoor.com/garage-door-repair-pleasanton',
     serviceAreas: 'https://www.valiantdoor.com/service-areas',
+    infinityShield: 'https://www.valiantdoor.com/infinity-shield-garage-door-sensor',
     reviewsProof: 'https://www.valiantdoor.com/reviews-and-proof',
     privacy: 'https://www.valiantdoor.com/privacy',
     terms: 'https://www.valiantdoor.com/terms',

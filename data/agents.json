@@ -34,6 +34,23 @@
     "Emergency garage door service",
     "Garage door maintenance"
   ],
+  "dealer_products": [
+    {
+      "name": "Infinity Shield Garage Door Sensor",
+      "relationship": "Dealer and installer",
+      "url": "https://www.valiantdoor.com/infinity-shield-garage-door-sensor",
+      "manufacturer_url": "https://infinity-shield.com/products/infinity-shield",
+      "facts": [
+        "25 infrared beams",
+        "3.5–71.5 inches of vertical detection coverage",
+        "8–18 foot supported door widths",
+        "450 ms manufacturer-listed response time",
+        "Powered by the opener through existing sensor wires",
+        "Optional parking-assistance beeper",
+        "UL-recognized and tested to UL 325, per manufacturer"
+      ]
+    }
+  ],
   "contact": {
     "phone": "9254094974",
     "email": "vm@valiantdoor.com"

@@ -5025,4 +5025,24 @@
     <image:image><image:loc>https://www.valiantdoor.com/assets/commercial/documented-repair/commercial-track-reset-before-after.webp</image:loc><image:title>Commercial track reset before and after report</image:title><image:caption>Location-redacted before-and-after documentation for a commercial track reset and alignment.</image:caption></image:image>
     <image:image><image:loc>https://www.valiantdoor.com/assets/commercial/documented-repair/repaired-rdrg-rolling-steel-door.webp</image:loc><image:title>Repaired rolling steel commercial door hardware</image:title><image:caption>Completed RDRG dead shaft retainer and commercial door hardware after repair.</image:caption></image:image>
   </url>
+  <url>
+    <loc>https://www.valiantdoor.com/infinity-shield-garage-door-sensor</loc>
+    <image:image>
+      <image:loc>https://www.valiantdoor.com/assets/infinity-shield/infinity-shield-full-coverage.webp</image:loc>
+      <image:title>Infinity Shield full-opening garage door sensor coverage comparison</image:title>
+      <image:caption>Infinity Shield dealer product image comparing a conventional single-beam sensor with the 25-beam full-opening array.</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://www.valiantdoor.com/assets/infinity-shield/infinity-shield-25-beam-array.webp</image:loc>
+      <image:title>Infinity Shield 25-beam infrared garage door sensor array</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://www.valiantdoor.com/assets/infinity-shield/infinity-shield-bracket-options.webp</image:loc>
+      <image:title>Infinity Shield standard short and adjustable mounting brackets</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://www.valiantdoor.com/assets/infinity-shield/infinity-shield-open-hatch.webp</image:loc>
+      <image:title>Infinity Shield open vehicle hatch detection demonstration</image:title>
+    </image:image>
+  </url>
 </urlset>
