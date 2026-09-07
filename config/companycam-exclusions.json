@@ -72,7 +72,9 @@
     "22221868",
     "22221866",
     "22198382",
-    "22375507"
+    "22375507",
+    "22419555",
+    "22419556"
   ],
   "reasons": {
     "20361027": "Removed by owner because the footage quality and content value were not suitable for the public website.",
@@ -147,6 +149,8 @@
     "22221868": "Publication hold: no project captions/comments on file and no clear demonstrable repair or install action visible; needs editorial caption context before publishing.",
     "22221866": "Publication hold: no project captions/comments on file and no clear demonstrable repair or install action visible; needs editorial caption context before publishing.",
     "22198382": "Publication hold: shows a white raised-panel door that does not match this project's captioned CHI plank-style door; ambiguous which door/stage this represents, needs editorial review before publishing.",
-    "22375507": "Publication hold: ambiguous panning footage of the top track/corner bracket area with no project captions or comments; no clear demonstrable repair or install action visible, needs editorial review before publishing."
+    "22375507": "Publication hold: ambiguous panning footage of the top track/corner bracket area with no project captions or comments; no clear demonstrable repair or install action visible, needs editorial review before publishing.",
+    "22419555": "Publication hold: footage includes an unintended picture-in-picture personal photo overlay baked into the video, and shows extensive personal customer belongings (moving boxes, furniture) rather than a demonstrable repair action; not suitable for public use without editing, owner review required.",
+    "22419556": "Publication hold: footage shows a cluttered residential garage walkthrough with a bystander vehicle and no clear demonstrable repair or install action; needs editorial review before publishing."
   }
 }
