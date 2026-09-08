@@ -393,6 +393,11 @@
 
   /* ---------- Hero ---------- */
   .hero { position: relative; overflow: hidden; }
+  .home-diamond-feature { position: relative; z-index: 3; padding: clamp(20px, 3.5vw, 38px) 0 0; background: #050506; }
+  .home-diamond-feature a { display: block; width: min(1050px, 100%); margin-inline: auto; border-radius: 4px; box-shadow: 0 22px 64px rgba(0,0,0,.55), 0 0 34px rgba(216,174,51,.14); transition: transform .2s ease, box-shadow .2s ease; }
+  .home-diamond-feature a:hover { transform: translateY(-2px); box-shadow: 0 26px 72px rgba(0,0,0,.62), 0 0 40px rgba(216,174,51,.2); }
+  .home-diamond-feature a:focus-visible { outline: 3px solid var(--gold-bright); outline-offset: 5px; }
+  .home-diamond-feature img { display: block; width: 100%; height: auto; }
   .hero::before {
     content: ""; position: absolute; inset: 0;
     background: url('/assets/home-optimized/hero-bg-1536.webp') center right / cover no-repeat;
@@ -744,6 +749,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </header>
 
 <main id="main">
+<!-- DIAMOND CERTIFIED HOMEPAGE FEATURE -->
+<section class="home-diamond-feature" aria-label="Valiant Garage Door Diamond Certified credential and contact information">
+  <div class="wrap">
+    <a href="https://www.diamondcertified.org/report/valiant-garage-door/" target="_blank" rel="noopener noreferrer" aria-label="Verify Valiant Garage Door's Diamond Certified certificate 2953">
+      <img src="/assets/credentials/valiant-diamond-certified-homepage-banner.webp" alt="Valiant Garage Door: Diamond Certified certificate 2953, 24/7 garage door repair, IDEA Certified, California contractor license 1160068, call or text 925-409-4974, and scan to book" width="1050" height="600" fetchpriority="high" decoding="sync">
+    </a>
+  </div>
+</section>
 <!-- HERO -->
 <section class="hero">
   <div class="wrap hero-inner">
