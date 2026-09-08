@@ -20,6 +20,10 @@
       url: "https://www.valiantdoor.com/",
       telephone: "+1-925-409-4974",
       identifier: LICENSE_LABEL,
+      award: "Diamond Certified — Certificate #2953, since August 2026",
+      sameAs: [
+        "https://www.diamondcertified.org/report/valiant-garage-door/"
+      ],
       hasCredential: {
         "@type": "EducationalOccupationalCredential",
         name: LICENSE_LABEL,
@@ -421,6 +425,17 @@
   footer.className = "global-site-footer";
   footer.innerHTML = `
     <div class="global-wrap">
+      <aside class="global-diamond-proof" aria-labelledby="globalDiamondTitle">
+        <a class="global-diamond-image-link" href="https://www.diamondcertified.org/report/valiant-garage-door/" target="_blank" rel="noopener noreferrer" aria-label="View Valiant Garage Door's official Diamond Certified report">
+          <img src="/assets/credentials/diamond-certified-valiant-2026.webp" alt="Valiant Garage Door Diamond Certified certificate 2953: 5.0 rating from 26 verified customer surveys, certified since August 2026" loading="lazy" decoding="async" width="506" height="1272">
+        </a>
+        <div class="global-diamond-copy">
+          <p class="global-diamond-kicker">Independent verified-customer credential</p>
+          <h2 id="globalDiamondTitle">Valiant Garage Door is Diamond Certified</h2>
+          <p><strong>5.0 rating from 26 verified customer surveys.</strong> Rated Highest in Quality and Helpful Expertise, with performance guaranteed. Diamond Certified since August 2026 · Certificate #2953.</p>
+          <a class="global-diamond-link" href="https://www.diamondcertified.org/report/valiant-garage-door/" target="_blank" rel="noopener noreferrer">Read the verified Diamond Certified report <span aria-hidden="true">→</span></a>
+        </div>
+      </aside>
       <div class="global-footer-grid">
         <div class="global-footer-brand">
           ${brand}
