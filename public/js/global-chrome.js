@@ -160,188 +160,23 @@
     syncReviewStats();
   }
 
-  const initializeSiteBot = (() => {
-    const INJECT_URL = "https://cdn.botpress.cloud/webchat/v3.6/inject.js";
-    const CONFIG_URL = "/js/botpress-config.js";
-    const MAX_ATTEMPTS = 3;
-    const LOAD_TIMEOUT = 12000;
-    let started = false;
+  // Housecall Pro website chat. The provider script reads these exact attributes
+  // from its own script element before mounting the cross-origin chat iframe.
+  (function mountHousecallProChat() {
+    if (currentPath === "/business-card") return; // loaded by site-bot.js on the standalone card
+    if (document.getElementById("housecall-pro-chat-bubble") || document.getElementById("proChatIframe")) return;
 
-    const findScript = (url) =>
-      Array.from(document.scripts).find((script) => script.src && script.src.split("?")[0] === url);
+    const script = document.createElement("script");
+    script.id = "housecall-pro-chat-bubble";
+    script.src = "https://chat.housecallpro.com/proChat.js";
+    script.type = "text/javascript";
+    script.dataset.color = "#bcaa34";
+    script.dataset.organization = "544de216-f35f-4c0b-835a-7950591bbd80";
+    script.defer = true;
 
-    const loadScript = (url, id, attempt) =>
-      new Promise((resolve, reject) => {
-        const existing = findScript(url);
-        if (existing?.dataset.valiantLoaded === "true") {
-          resolve(existing);
-          return;
-        }
-
-        const script = existing || document.createElement("script");
-        const timer = window.setTimeout(() => reject(new Error(`${id} timed out`)), LOAD_TIMEOUT);
-        const finish = () => {
-          window.clearTimeout(timer);
-          script.dataset.valiantLoaded = "true";
-          resolve(script);
-        };
-        const fail = () => {
-          window.clearTimeout(timer);
-          script.remove();
-          reject(new Error(`${id} failed to load`));
-        };
-
-        script.addEventListener("load", finish, { once: true });
-        script.addEventListener("error", fail, { once: true });
-        if (!existing) {
-          script.id = id;
-          script.src = `${url}${attempt > 1 ? `?retry=${attempt}` : ""}`;
-          script.async = false;
-          script.crossOrigin = "anonymous";
-          document.body.append(script);
-        } else if (url === INJECT_URL && window.botpress) {
-          finish();
-        }
-      });
-
-    const botIsMounted = () =>
-      Boolean(
-        document.querySelector('iframe[src*="botpress"], #bp-web-widget-container, [data-botpress-webchat], .bpChatContainer, #fab-root')
-      );
-
-    const start = async () => {
-      if (started || botIsMounted()) return;
-      started = true;
-
-      for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
-        try {
-          if (!window.botpress) {
-            const staleRuntime = findScript(INJECT_URL);
-            if (staleRuntime && document.readyState === "complete") staleRuntime.remove();
-            await loadScript(INJECT_URL, "valiant-botpress-runtime", attempt);
-          }
-          if (!window.botpress) throw new Error("Botpress runtime unavailable");
-
-          if (!botIsMounted()) {
-            const staleConfig = findScript(CONFIG_URL);
-            if (staleConfig && staleConfig.dataset.valiantLoaded !== "true") staleConfig.remove();
-            await loadScript(CONFIG_URL, "valiant-botpress-config", attempt);
-          }
-          return;
-        } catch (error) {
-          if (attempt === MAX_ATTEMPTS) return;
-          await new Promise((resolve) => window.setTimeout(resolve, attempt * 1000));
-        }
-      }
-    };
-
-    return start;
-  })();
-
-  // Lazy chat: render a lightweight static shield button immediately, and only
-  // download the Botpress widget (~5.5MB) when the visitor actually opens chat.
-  // This keeps all of that weight off the initial load / LCP path entirely.
-  (function mountChatLauncher() {
-    if (currentPath === "/business-card") return; // digital card has no site chrome
-
-    const botIsMounted = () =>
-      Boolean(document.querySelector('iframe[src*="botpress"], #bp-web-widget-container, [data-botpress-webchat], .bpChatContainer, #fab-root'));
-
-    const fab = document.createElement("button");
-    fab.type = "button";
-    fab.id = "valiant-chat-fab";
-    fab.setAttribute("aria-label", "Open chat with Valiant Garage Door");
-    fab.innerHTML =
-      '<img src="/assets/valiant-chat-fab-shield.webp" width="34" height="34" alt="" decoding="async">' +
-      '<span class="valiant-chat-fab-pulse" aria-hidden="true"></span>';
-
-    let launching = false;
-    const launch = () => {
-      if (launching) return;
-      launching = true;
-      fab.classList.add("is-loading");
-      fab.setAttribute("aria-busy", "true");
-      initializeSiteBot();
-      // Applies FAB sizing/branding CSS and the fallback assistant once the
-      // Botpress runtime is loading (defined in main.js).
-      if (typeof window.__valiantInitBotpressEnhancements === "function") {
-        window.__valiantInitBotpressEnhancements();
-      }
-
-      // Once the real widget mounts, open it and retire the placeholder.
-      let waited = 0;
-      const poll = window.setInterval(() => {
-        waited += 250;
-        if (window.botpress && typeof window.botpress.open === "function") {
-          try { window.botpress.open(); } catch { /* ignore */ }
-        }
-        if (botIsMounted()) {
-          window.clearInterval(poll);
-          fab.remove();
-          // Inject close button fix CSS into Botpress shadow DOM
-          injectCloseButtonFix();
-        } else if (waited >= 20000) {
-          window.clearInterval(poll); // give up gracefully; call/book CTAs remain
-          fab.classList.remove("is-loading");
-          fab.removeAttribute("aria-busy");
-          launching = false;
-        }
-      }, 250);
-    };
-
-    fab.addEventListener("click", launch);
-    const add = () => document.body.appendChild(fab);
+    const add = () => document.body.appendChild(script);
     if (document.body) add();
     else document.addEventListener("DOMContentLoaded", add, { once: true });
-
-    // Inject CSS into Botpress shadow DOM to fix close button overlap with sticky call banner
-    function injectCloseButtonFix() {
-      const fabRoot = document.getElementById("fab-root");
-      if (!fabRoot?.shadowRoot) return;
-      const sr = fabRoot.shadowRoot;
-      if (sr.querySelector("#valiant-close-fix")) return;
-      const style = document.createElement("style");
-      style.id = "valiant-close-fix";
-      style.textContent = `
-        @media (max-width: 760px) {
-          .bpWebchat.bpOpen,
-          .bpWebchat.bpOpen.bpFABWebchat {
-            top: 60px !important;
-            bottom: 8px !important;
-            height: calc(100dvh - 68px) !important;
-            max-height: calc(100dvh - 68px) !important;
-          }
-          .bpWebchat.bpOpen .bpHeaderContentActionsIcons,
-          .bpWebchat.bpOpen svg[aria-label="Close Chatbot Button"] {
-            flex-shrink: 0 !important;
-            min-width: 34px !important;
-            min-height: 34px !important;
-          }
-        }
-      `;
-      sr.appendChild(style);
-    }
-  })();
-
-  // Add accessible names to the Botpress chat widget images (injected at runtime).
-  // Fixes Lighthouse "image without [alt]" and "ARIA role should be appropriate"
-  // (a role="button" element needs an accessible name).
-  (function patchBotpressA11y() {
-    const label = (img, text) => {
-      if (!img || img.dataset.valiantA11y === "true") return;
-      img.setAttribute("alt", text);
-      img.setAttribute("aria-label", text);
-      img.dataset.valiantA11y = "true";
-    };
-    const patch = () => {
-      document.querySelectorAll("img.bpFabImage").forEach((el) => label(el, "Open chat with Valiant Garage Door"));
-      document.querySelectorAll("img.bpMessagePreviewAvatarImage").forEach((el) => label(el, "Valiant Garage Door chat assistant"));
-    };
-    patch();
-    const observer = new MutationObserver(patch);
-    observer.observe(document.body, { childList: true, subtree: true });
-    // Stop observing after 60s; the widget mounts well within this window.
-    window.setTimeout(() => observer.disconnect(), 60000);
   })();
 
   document.querySelectorAll("section").forEach((section) => {
