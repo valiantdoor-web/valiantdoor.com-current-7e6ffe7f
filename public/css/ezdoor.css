@@ -14,6 +14,7 @@
 html { scroll-behavior: smooth; }
 body.page-ezdoor {
   margin: 0;
+  overflow-x: hidden;
   background: var(--ez-bg);
   color: var(--ez-text);
   font-family: Inter, Arial, sans-serif;
@@ -180,6 +181,10 @@ body.page-ezdoor {
 .ez-final-cta p { margin: 12px 0 0; color: var(--ez-muted); line-height: 1.6; }
 .ez-final-cta .ez-actions { max-width: 520px; justify-content: flex-end; margin-top: 0; }
 .ez-text-link { color: var(--ez-gold-bright) !important; font-weight: 800; text-decoration: none; }
+
+@media (min-width: 881px) and (max-width: 1400px) {
+  .page-ezdoor .global-header-call { display: none; }
+}
 
 @media (max-width: 999px) {
   .ez-frame-shell { display: none; }
