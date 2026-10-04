@@ -103,6 +103,51 @@
     });
   })();
 
+  // Record high-intent actions without sending customer-entered values or
+  // converting ordinary clicks into Google Ads conversions.
+  const trackValiantAction = (eventName, parameters = {}) => {
+    if (typeof window.gtag !== "function") return;
+    window.gtag("event", eventName, {
+      page_path: currentPath,
+      transport_type: "beacon",
+      ...parameters
+    });
+  };
+
+  document.addEventListener("click", (event) => {
+    if (!(event.target instanceof Element)) return;
+    const link = event.target.closest("a[href]");
+    if (!link) return;
+
+    const href = link.getAttribute("href") || "";
+    const linkText = (link.textContent || "").replace(/\s+/g, " ").trim().slice(0, 100);
+    if (href.startsWith("tel:")) {
+      trackValiantAction("phone_click", { link_text: linkText });
+      return;
+    }
+    if (href.startsWith("sms:")) {
+      trackValiantAction("text_click", { link_text: linkText });
+      return;
+    }
+    if (/^https:\/\/book\.housecallpro\.com\/book\/Valiant-Garage-Door\//i.test(href)) {
+      trackValiantAction("booking_click", { link_text: linkText });
+      return;
+    }
+    if (/^\/(?:quote|instant-estimate)(?:[/?#]|$)/i.test(href)) {
+      trackValiantAction("estimate_click", {
+        link_text: linkText,
+        destination_path: href.split(/[?#]/, 1)[0]
+      });
+    }
+  });
+
+  document.addEventListener("submit", (event) => {
+    if (!(event.target instanceof HTMLFormElement)) return;
+    trackValiantAction("lead_form_submit", {
+      form_id: (event.target.id || "unlabeled").slice(0, 100)
+    });
+  });
+
   // ---- Nextdoor ad click ID (ndclid) capture ----
   // Nextdoor appends ?ndclid=... to our URL when someone clicks a Nextdoor ad.
   // We store it in a long-lived cookie so it survives across pages/sessions
@@ -173,6 +218,9 @@
     script.dataset.color = "#bcaa34";
     script.dataset.organization = "544de216-f35f-4c0b-835a-7950591bbd80";
     script.defer = true;
+    script.addEventListener("load", () => {
+      trackValiantAction("chat_widget_loaded", { provider: "housecall_pro" });
+    }, { once: true });
 
     const add = () => document.body.appendChild(script);
     if (document.body) add();

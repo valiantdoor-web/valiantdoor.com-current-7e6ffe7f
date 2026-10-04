@@ -8,26 +8,10 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const PUBLIC = path.join(ROOT, "public");
 const WRITE = process.argv.includes("--write");
 
-const GTM_ID = "GTM-T74PV8L5";
-const RETIRED_GTM_ID = "GTM-WPJ77LQ8";
-
-const GTM_HEAD = `<!-- Google Tag Manager -->
-<script>
-(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','${GTM_ID}');
-</script>
-<!-- End Google Tag Manager -->
-`;
-
-const GTM_BODY = `
-<!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=${GTM_ID}"
-height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-<!-- End Google Tag Manager (noscript) -->
-`;
+// This container currently returns HTTP 404. Sitewide measurement is handled
+// by /js/global-chrome.js, which initializes the verified GA4 and Ads tags.
+const DEAD_GTM_ID = "GTM-T74PV8L5";
+const GLOBAL_CHROME_SRC = "/js/global-chrome.js?v=20261004-measurement";
 
 function walkHtml(dir, output = []) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -40,7 +24,7 @@ function walkHtml(dir, output = []) {
 
 function sitemapTargets() {
   const targets = new Set();
-  for (const sitemap of ["sitemap-pages.xml", "sitemap-blog.xml"]) {
+  for (const sitemap of ["sitemap-pages.xml", "sitemap-blog.xml", "sitemap-video.xml"]) {
     const xml = fs.readFileSync(path.join(PUBLIC, sitemap), "utf8");
     for (const match of xml.matchAll(/<loc>(.*?)<\/loc>/g)) {
       const url = new URL(match[1]);
@@ -55,58 +39,56 @@ function sitemapTargets() {
   return targets;
 }
 
-function removeRetiredContainer(html, file) {
+function removeDeadContainer(html) {
   let output = html;
 
   output = output.replace(
-    /<!-- Google Tag Manager \(Nextdoor container\) -->[\s\S]*?<!-- End Google Tag Manager \(Nextdoor container\) -->\s*/g,
-    ""
+    /\s*<!-- Google Tag Manager -->\s*<script\b[^>]*>(?:(?!<\/script>)[\s\S])*?GTM-T74PV8L5(?:(?!<\/script>)[\s\S])*?<\/script>\s*<!-- End Google Tag Manager -->\s*/gi,
+    "\n"
   );
   output = output.replace(
-    /<!-- Google Tag Manager \(noscript, Nextdoor container\) -->[\s\S]*?<!-- End Google Tag Manager \(noscript, Nextdoor container\) -->\s*/g,
-    ""
-  );
-  output = output.replace(
-    /<!-- Google Tag Manager \(noscript, Nextdoor container\) -->\s*<noscript>[\s\S]*?GTM-WPJ77LQ8[\s\S]*?<\/noscript>\s*/g,
-    ""
+    /\s*<!-- Google Tag Manager \(noscript\) -->\s*<noscript>(?:(?!<\/noscript>)[\s\S])*?GTM-T74PV8L5(?:(?!<\/noscript>)[\s\S])*?<\/noscript>\s*<!-- End Google Tag Manager \(noscript\) -->\s*/gi,
+    "\n"
   );
 
-  if (output.includes(RETIRED_GTM_ID)) {
-    throw new Error(`Retired container remains after normalization: ${path.relative(ROOT, file)}`);
-  }
+  // Cover legacy pages that contain the same snippets without comments.
+  output = output.replace(
+    /\s*<script\b[^>]*>(?:(?!<\/script>)[\s\S])*?GTM-T74PV8L5(?:(?!<\/script>)[\s\S])*?<\/script>\s*/gi,
+    "\n"
+  );
+  output = output.replace(
+    /\s*<noscript>\s*<iframe\b(?:(?!<\/iframe>)[\s\S])*?GTM-T74PV8L5(?:(?!<\/iframe>)[\s\S])*?<\/iframe>\s*<\/noscript>\s*/gi,
+    "\n"
+  );
+  output = output.replace(
+    /\s*<!-- (?:End )?Google Tag Manager(?: \(noscript\))? -->\s*/gi,
+    "\n"
+  );
+
   return output;
 }
 
 const allHtml = walkHtml(PUBLIC);
 const targets = sitemapTargets();
 let changed = 0;
-let addedHead = 0;
-let addedBody = 0;
-let removedRetired = 0;
+let removedDeadContainer = 0;
+let addedGlobalChrome = 0;
 
 for (const file of allHtml) {
   const before = fs.readFileSync(file, "utf8");
-  let after = removeRetiredContainer(before, file);
-  if (after !== before) removedRetired += 1;
+  let after = removeDeadContainer(before);
+  if (after !== before) removedDeadContainer += 1;
 
-  if (targets.has(file)) {
-    const headEnd = after.search(/<\/head>/i);
-    const head = headEnd >= 0 ? after.slice(0, headEnd) : after;
-
-    if (!head.includes(GTM_ID)) {
-      after = after.replace(/<head(\s[^>]*)?>/i, (match) => `${match}\n${GTM_HEAD}`);
-      addedHead += 1;
+  if (targets.has(file) && !after.includes("/js/global-chrome.js")) {
+    if (!/<\/body>/i.test(after)) {
+      throw new Error(`Cannot add global measurement before </body>: ${path.relative(ROOT, file)}`);
     }
-    if (!/594683\.tctm\.co\/t\.js/.test(head)) {
-      after = after.replace(/<head(\s[^>]*)?>/i, (match) => `${match}\n<script async src="https://594683.tctm.co/t.js"></script>`);
-    }
+    after = after.replace(/<\/body>/i, `  <script src="${GLOBAL_CHROME_SRC}" defer></script>\n</body>`);
+    addedGlobalChrome += 1;
+  }
 
-    after = after.replace(/src="\/\/594683\.tctm\.co\/t\.js"/g, 'src="https://594683.tctm.co/t.js"');
-
-    if (!after.includes(`googletagmanager.com/ns.html?id=${GTM_ID}`)) {
-      after = after.replace(/<body(\s[^>]*)?>/i, (match) => `${match}${GTM_BODY}`);
-      addedBody += 1;
-    }
+  if (after.includes(DEAD_GTM_ID)) {
+    throw new Error(`Dead GTM container remains: ${path.relative(ROOT, file)}`);
   }
 
   if (after !== before) {
@@ -122,9 +104,8 @@ console.log(
       sitemapTargets: targets.size,
       htmlFiles: allHtml.length,
       changed,
-      addedHead,
-      addedBody,
-      removedRetired,
+      removedDeadContainer,
+      addedGlobalChrome,
     },
     null,
     2
