@@ -37,7 +37,11 @@
   // Previously this was trapped inside setupDeferredHomepageTracking() which
   // only ran on page-home, leaving 100+ pages with zero session recording.
   (function loadClarity() {
-    if (document.querySelector('script[data-valiant-clarity]')) return;
+    if (
+      document.querySelector(
+        'script[data-valiant-clarity], script[src*="clarity.ms/tag/xbiv7tx2p3"]'
+      )
+    ) return;
     const s = document.createElement('script');
     s.src = 'https://www.clarity.ms/tag/xbiv7tx2p3';
     s.async = true;
@@ -45,11 +49,11 @@
     (document.head || document.documentElement).appendChild(s);
   })();
 
-  // ---- Google Analytics 4: initialize the current Valiant property sitewide ----
-  // Many legacy pages already load gtag.js for an older GA4/Ads destination.
-  // Reuse that library when present so the browser never downloads it twice.
+  // ---- Google Analytics 4: initialize the official Valiant property sitewide ----
+  // Keep a single Google tag queue and one official GA4 destination while
+  // preserving the verified Google Ads destinations.
   (function loadValiantGa4() {
-    const measurementId = "G-R5068WB0YC";
+    const measurementId = "G-0X81XNNJM4";
     const adsDestinations = ["AW-17968443655", "AW-17909190639"];
     window.dataLayer = window.dataLayer || [];
     window.gtag = window.gtag || function () {
@@ -147,6 +151,12 @@
       form_id: (event.target.id || "unlabeled").slice(0, 100)
     });
   });
+
+  if (currentPath === "/thank-you") {
+    trackValiantAction("thank_you_view", {
+      lead_type: "website_confirmation"
+    });
+  }
 
   // ---- Nextdoor ad click ID (ndclid) capture ----
   // Nextdoor appends ?ndclid=... to our URL when someone clicks a Nextdoor ad.
