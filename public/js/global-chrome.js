@@ -53,7 +53,7 @@
   // Keep a single Google tag queue and one official GA4 destination while
   // preserving the verified Google Ads destinations.
   (function loadValiantGa4() {
-    const measurementId = "G-0X81XNNJM4";
+    const measurementId = "G-RVSWB9D2M5";
     const adsDestinations = ["AW-17968443655", "AW-17909190639"];
     window.dataLayer = window.dataLayer || [];
     window.gtag = window.gtag || function () {

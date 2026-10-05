@@ -11,7 +11,7 @@ const WRITE = process.argv.includes("--write");
 // This container currently returns HTTP 404. Sitewide measurement is handled
 // by /js/global-chrome.js, which initializes the verified GA4 and Ads tags.
 const DEAD_GTM_ID = "GTM-T74PV8L5";
-const GLOBAL_CHROME_SRC = "/js/global-chrome.js?v=20261004-official-ga4";
+const GLOBAL_CHROME_SRC = "/js/global-chrome.js?v=20261004-ga4-stream-repair";
 const LEGACY_GA4_ID = "G-R5068WB0YC";
 
 function walkHtml(dir, output = []) {
