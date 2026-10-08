@@ -35,7 +35,10 @@ async function fetchGoogle() {
       'X-Goog-FieldMask': 'rating,userRatingCount',
     },
   })
-  if (!resp.ok) return null
+  if (!resp.ok) {
+    console.warn('[reviews] Google Places request failed with HTTP', resp.status)
+    return null
+  }
 
   const json = await resp.json()
   if (typeof json.rating !== 'number') return null
@@ -79,7 +82,7 @@ module.exports = async (req, res) => {
 
   res.setHeader('Content-Type', 'application/json; charset=utf-8')
   // Let the CDN cache the response for an hour, revalidate in background.
-  res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=86400')
+  res.setHeader('Cache-Control', google ? 's-maxage=3600, stale-while-revalidate=3600' : 'no-store')
   res.statusCode = 200
   res.end(JSON.stringify(payload))
 }
