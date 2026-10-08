@@ -197,10 +197,12 @@
         .then((r) => (r.ok ? r.json() : null))
         .then((d) => {
           if (!d) return;
+          // A stale fallback must never overwrite the count baked into the page.
+          const liveGoogle = d.source === "google-places";
           const rating = typeof d.googleRating === "number" ? d.googleRating : null;
           const count = typeof d.googleReviewCount === "number" ? d.googleReviewCount : null;
-          if (rating !== null) setVisible("google-rating", rating.toFixed(1));
-          if (count !== null) setVisible("google-count", String(count));
+          if (liveGoogle && rating !== null) setVisible("google-rating", rating.toFixed(1));
+          if (liveGoogle && count !== null) setVisible("google-count", String(count));
           if (typeof d.nextdoorFaves === "number") setVisible("nextdoor-faves", String(d.nextdoorFaves));
         })
         .catch(() => {
@@ -314,6 +316,14 @@
       </div>
     </div>`;
 
+  const diamondCityReports = [
+    ["pleasanton", "Pleasanton"], ["dublin", "Dublin"], ["livermore", "Livermore"],
+    ["hayward", "Hayward"], ["fremont", "Fremont"], ["castro-valley", "Castro Valley"]
+  ];
+  const diamondCity = diamondCityReports.find(([slug]) => currentPath.includes(slug));
+  const diamondCityLink = diamondCity
+    ? `<a href="https://www.diamondcertified.org/category/garage-doors/ca/${diamondCity[0]}/" target="_blank" rel="noopener noreferrer">Diamond Certified ${diamondCity[1]} directory ↗</a>`
+    : "";
   const footer = document.createElement("footer");
   footer.className = "global-site-footer";
   footer.innerHTML = `
@@ -329,6 +339,16 @@
           <a class="global-diamond-link" href="https://www.diamondcertified.org/report/valiant-garage-door/" target="_blank" rel="noopener noreferrer">Read the verified Diamond Certified report <span aria-hidden="true">→</span></a>
         </div>
       </aside>
+
+      <section class="global-hcp-proof" aria-labelledby="globalHcpTitle">
+        <div class="global-hcp-badges">
+          <a href="/proof-before-proposal#recognition"><img src="/assets/credentials/housecall-pro-ambassador.webp" alt="Housecall Pro Ambassador" width="180" height="108" loading="lazy"></a>
+          <a href="/proof-before-proposal#recognition"><img src="/assets/credentials/housecall-pro-superpro.webp" alt="Housecall Pro SuperPro" width="180" height="108" loading="lazy"></a>
+        </div>
+        <div><p class="global-diamond-kicker">Documented service · Industry involvement</p><h2 id="globalHcpTitle">Proof Before Proposal</h2>
+        <p>See the findings, understand the recommendation, and see the completed work. Meet Valentino Ramirez, Housecall Pro Ambassador and Elite Super Pro.</p>
+        <div class="global-proof-links"><a href="/proof-before-proposal">See our process →</a><a href="https://www.diamondcertified.org/expert/valentino-ramirez/" target="_blank" rel="noopener noreferrer">Valentino’s Diamond Certified expert profile ↗</a>${diamondCityLink}<a href="/proof-before-proposal#experience">Our Housecall Pro experience →</a><a href="https://www.housecallpro.com/resources/garage-door-price-guide/" target="_blank" rel="noopener noreferrer">Featured by Housecall Pro ↗</a></div></div>
+      </section>
       <div class="global-footer-grid">
         <div class="global-footer-brand">
           ${brand}
