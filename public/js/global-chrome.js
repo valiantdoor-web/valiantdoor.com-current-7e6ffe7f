@@ -301,6 +301,7 @@
         ${servicesMenu}
         ${navLink("/service-areas", "Service Areas")}
         ${navLink("/repair-guides", "Repair Guides")}
+        ${navLink("/portfolio", "Project Portfolio")}
         ${navLink("/garage-door-before-after", "Before & After")}
         ${navLink("/community-garage-door-project", "Community Project")}
         ${navLink("/reviews-and-proof", "Reviews & Proof")}
