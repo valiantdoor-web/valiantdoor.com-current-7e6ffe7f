@@ -33,3 +33,7 @@ Moenave kit material pbmat_0f48798e9282403390062755d5af6788 sell price updated a
 
 ## Reusable plugin
 Housecall Pro for Valiant: https://chatgpt.com/plugins/Plugin_944202ad94708191b7ca62219a52a361. Private workspace plugin version 1.0.0, release pluginrel_6ac9661ca2d4819183eeaee0e4d5da56. Existing Vercel MCP declared; connection/authentication not yet verified through the new plugin.
+
+
+## Estimate drawing upload — verified 2026-10-09
+POST /estimates/{estimate_id}/options/{option_id}/attachments using multipart/form-data, field file, PDF filename and application/pdf content type. HCP returned 201 with attachment id, file_name, file_type and a signed download URL. Download that response URL immediately and compare SHA256 to the approved source; never publish/store the signed URL. Do not retry uncertain uploads blindly: duplicate files may result.
