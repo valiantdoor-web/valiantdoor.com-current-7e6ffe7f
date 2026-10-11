@@ -202,7 +202,12 @@
           const rating = typeof d.googleRating === "number" ? d.googleRating : null;
           const count = typeof d.googleReviewCount === "number" ? d.googleReviewCount : null;
           if (liveGoogle && rating !== null) setVisible("google-rating", rating.toFixed(1));
-          if (liveGoogle && count !== null) setVisible("google-count", String(count));
+          if (count !== null) {
+            document.querySelectorAll('[data-review="google-count"]').forEach((el) => {
+              const visible = Number(el.textContent.trim());
+              if (liveGoogle || !Number.isFinite(visible) || count >= visible) el.textContent = String(count);
+            });
+          }
           if (typeof d.nextdoorFaves === "number") setVisible("nextdoor-faves", String(d.nextdoorFaves));
         })
         .catch(() => {
