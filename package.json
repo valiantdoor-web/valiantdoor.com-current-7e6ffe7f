@@ -8,6 +8,7 @@
     "lib": "lib"
   },
   "scripts": {
+    "vercel-build": "node scripts/inject-speed-insights.mjs",
     "dev": "node server.js",
     "start": "node server.js",
     "test": "node -e \"require('./api/authority-dashboard.js'); console.log('authority dashboard api ok')\" && npm run validate:indexing",
