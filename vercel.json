@@ -420,6 +420,10 @@
     {
       "source": "/sitemap-blog.xml",
       "destination": "/api/blog?view=sitemap"
+    },
+    {
+      "source": "/blog/:language/:slug",
+      "destination": "/api/blog?language=:language&slug=:slug"
     }
   ],
   "functions": {
@@ -429,6 +433,16 @@
     "api/blog-webhook.js": {
       "maxDuration": 120,
       "includeFiles": "lib/blog-static-slugs.json"
+    },
+    "api/blog-sync.js": {
+      "maxDuration": 300,
+      "includeFiles": "lib/blog-static-slugs.json"
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/blog-sync",
+      "schedule": "0 * * * *"
+    }
+  ]
 }
