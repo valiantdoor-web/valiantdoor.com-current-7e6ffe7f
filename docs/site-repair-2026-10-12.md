@@ -39,6 +39,7 @@ The source scan inspected **592 HTML files/templates** and validated **354 publi
 - Regression tests passed for incomplete imported business stubs and credentials in the live blog index/article renderer.
 - Attribution regression tests passed for direct website visits, actual Nextdoor clicks, and organic Nextdoor visits.
 - Moenave and repair hero image/video sources were checked against the starting production commit.
+- Moenave retains its custom navigation/footer while loading shared measurement; the common header/footer is explicitly disabled on that page.
 - Private listings/command-center app files were excluded from this release.
 
 ## External account limit

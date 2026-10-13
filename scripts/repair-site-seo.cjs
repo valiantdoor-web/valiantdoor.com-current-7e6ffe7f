@@ -82,6 +82,8 @@ for(const page of pages) {
   const before=html;
   const publicPage=eligible(html,route);
   if(publicPage) {
+    // The architectural landing page owns its immersive navigation/footer.
+    if(route==='/moenave-garage-doors')html=html.replace(/<body(?![^>]*data-chrome)[^>]*>/i,tag=>tag.replace('>',' data-chrome="off">'));
     if(conciseTitles[route])html=metadata(html,'title',conciseTitles[route]);
     if(route.startsWith('/portfolio/projects/')) {
       const h1=text(html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1]||'');
