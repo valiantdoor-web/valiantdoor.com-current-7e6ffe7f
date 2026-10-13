@@ -10,7 +10,7 @@ function booking(search){
  vm.runInNewContext(script,context);button.click();return new URL(anchor.href);
 }
 test('an internal website visit does not become a paid Nextdoor booking',()=>{
- const url=booking('');assert.equal(url.searchParams.get('utm_source'),null);assert.equal(url.searchParams.get('utm_medium'),null);assert.equal(url.searchParams.get('v2'),'true');
+ const url=booking('');assert.equal(url.searchParams.get('utm_source'),null);assert.equal(url.searchParams.get('utm_medium'),null);assert.equal(url.searchParams.get('v2'),'true');assert.equal(url.searchParams.get('utm_content'),'broken-spring');
 });
 test('an actual Nextdoor click retains attribution and the selected repair problem',()=>{
  const url=booking('?ndclid=test-click&utm_medium=paid_social&utm_campaign=actual-campaign');
