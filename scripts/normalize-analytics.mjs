@@ -11,7 +11,7 @@ const WRITE = process.argv.includes("--write");
 // This container currently returns HTTP 404. Sitewide measurement is handled
 // by /js/global-chrome.js, which initializes the verified GA4 and Ads tags.
 const DEAD_GTM_ID = "GTM-T74PV8L5";
-const GLOBAL_CHROME_SRC = "/js/global-chrome.js?v=20261004-ga4-stream-repair";
+const GLOBAL_CHROME_SRC = JSON.parse(fs.readFileSync(path.join(ROOT, "data/site-asset-versions.json"), "utf8"))["/js/global-chrome.js"];
 const LEGACY_GA4_ID = "G-R5068WB0YC";
 
 function walkHtml(dir, output = []) {
@@ -116,7 +116,7 @@ function removeLegacyTrackingBootstrap(html) {
 
 function normalizeGlobalChromeVersion(html) {
   return html.replace(
-    /\/js\/global-chrome\.js(?:\?[^"']*)?/gi,
+    /\/js\/global-chrome(?:\.min)?\.js(?:\?[^"']*)?/gi,
     GLOBAL_CHROME_SRC
   );
 }
@@ -140,7 +140,7 @@ for (const file of allHtml) {
   after = normalizeGlobalChromeVersion(after);
   if (after !== afterLegacyTracking) updatedGlobalChromeVersion += 1;
 
-  if (targets.has(file) && !after.includes("/js/global-chrome.js")) {
+  if (targets.has(file) && !/\/js\/global-chrome(?:\.min)?\.js/.test(after)) {
     if (!/<\/body>/i.test(after)) {
       throw new Error(`Cannot add global measurement before </body>: ${path.relative(ROOT, file)}`);
     }

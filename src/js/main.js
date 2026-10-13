@@ -1437,21 +1437,6 @@ const setupNextdoorCapiLead = () => {
 
 setupNextdoorCapiLead();
 
-const setupGoogleAdsQuoteConversion = () => {
-  if (normalizePath(window.location.pathname) !== "/quote") return;
-
-  const fireLeadConversion = () => {
-    if (typeof window.gtag !== "function") return;
-    window.gtag("event", "ads_conversion_Submit_lead_form_1");
-  };
-
-  Array.from(
-    document.querySelectorAll('a[href*="book.housecallpro.com/book/Valiant-garage-door"]')
-  ).forEach((link) => {
-    if (link.dataset.valiantAdsLeadBound === "true") return;
-    link.dataset.valiantAdsLeadBound = "true";
-    link.addEventListener("click", fireLeadConversion);
-  });
-};
-
-setupGoogleAdsQuoteConversion();
+// Booking links are measured as booking_click by global-chrome.js. Successful
+// website form submissions emit lead_form_success and the existing Ads event
+// from lead-capture.js / estimate-upload.js after the API accepts the request.

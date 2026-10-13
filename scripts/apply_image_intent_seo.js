@@ -154,7 +154,7 @@ function upsertIntent($, canonical, title, route, intent, imgs) {
     keywords: [intent.primary, ...intent.secondary],
     about: [
       { '@type': 'Service', name: intent.service, areaServed: intent.area },
-      { '@type': 'LocalBusiness', name: 'Valiant Garage Door', telephone: '9254094974' }
+      { '@id': 'https://www.valiantdoor.com/#business' }
     ],
     image: imgs.slice(0, 6).map(src => src.startsWith('http') ? src : SITE + src),
     dateModified: TODAY

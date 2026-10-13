@@ -4,7 +4,7 @@ Every agent must read this file before pushing or deploying anything related to 
 
 ## Main website
 - Live domain: https://www.valiantdoor.com/
-- Website repository: https://github.com/valiantdoor-web/valiantdoor.com-current.git
+- Website repository: https://github.com/valiantdoor-web/valiantdoor.com-current-7e6ffe7f.git
 - Local website repo: /Users/vm/Code/valiantdoor-live-edit-deploy
 - Vercel project name: valiantdoor-com-current
 - Vercel project ID: prj_JvCujZmnI32dWtCr210nKF2pPj1f
@@ -14,7 +14,7 @@ Every agent must read this file before pushing or deploying anything related to 
 
 ## Deployment pipeline (CRITICAL — read before deploying)
 Root cause of the long-standing "my changes never go live" problem (fixed 2026-07-20):
-- The repo `valiantdoor-web/valiantdoor.com-current` (repoId 1296543400) is a FORK of the
+- The repo `valiantdoor-web/valiantdoor.com-current-7e6ffe7f` (repoId 1296543400) is a FORK of the
   parent `Valiant-Production-Co/valiantdoor.com-current` (repoId 1162332791).
 - All work (v0 commits, PRs, merges to `main`) happens on the FORK.
 - The Vercel project's Git integration was mistakenly linked to the PARENT repo, so pushes
@@ -23,12 +23,12 @@ Root cause of the long-standing "my changes never go live" problem (fixed 2026-0
   reached www.valiantdoor.com.
 
 The fix (permanent):
-- Re-linked the Vercel project's Git integration to the FORK `valiantdoor-web/valiantdoor.com-current`
+- Re-linked the Vercel project's Git integration to the FORK `valiantdoor-web/valiantdoor.com-current-7e6ffe7f`
   (repoId 1296543400), production branch `main`, createDeployments enabled.
 - From now on, a push/merge to `main` on the fork auto-deploys to production.
 
 How to deploy going forward:
-1. Merge the change into `main` on `valiantdoor-web/valiantdoor.com-current` (the fork).
+1. Merge the change into `main` on `valiantdoor-web/valiantdoor.com-current-7e6ffe7f` (the fork).
 2. Vercel auto-builds and aliases www.valiantdoor.com. No manual step needed.
 3. Verify live within ~2 min (curl the page; check a marker you changed).
 4. If auto-deploy ever stops again, first confirm the Vercel project is still linked to the
@@ -46,7 +46,7 @@ when in doubt, deploy from a fresh clone of the fork's `main`.
 ## Required production gate
 Before any production push or deploy:
 1. Confirm the target is the main website repo above, not the service app or another Vercel project.
-2. Confirm `.vercel/project.json` shows projectName `2026-01-26-website` for website deploys.
+2. Verify the live project ID `prj_JvCujZmnI32dWtCr210nKF2pPj1f`, team ID `team_O6ZRh3X80wVbdhhQp2hpYNGD`, project name `valiantdoor-com-current`, and the `www.valiantdoor.com` production domain. The former `2026-01-26-website` project name is historical. For CLI releases, link `.vercel/project.json` to these verified current IDs.
 3. Run a repo status check and do not include app/editor/user-state files in a website production commit.
 4. Verify navigation, sitemap, linked sections, and affected pages if a change is described as sitewide or global.
 5. Do not expose, print, or commit API keys or secrets.

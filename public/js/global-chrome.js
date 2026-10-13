@@ -1,6 +1,10 @@
 (() => {
   "use strict";
 
+  // A repeated shared script must not duplicate measurement or click handlers.
+  if (window.__valiantGlobalChromeInitialized) return;
+  window.__valiantGlobalChromeInitialized = true;
+
   const PHONE = "(925) 409-4974";
   const PHONE_HREF = "tel:+19254094974";
   const LICENSE_NUMBER = "1160068";
@@ -8,30 +12,8 @@
   const BOOK_URL = "https://book.housecallpro.com/book/Valiant-Garage-Door/ae8e4a137c8c49b4b264073541533a7a?v2=true";
   const currentPath = window.location.pathname.replace(/\/+$/, "") || "/";
 
-  if (!document.querySelector('script[data-valiant-license-schema]')) {
-    const licenseSchema = document.createElement("script");
-    licenseSchema.type = "application/ld+json";
-    licenseSchema.dataset.valiantLicenseSchema = "";
-    licenseSchema.textContent = JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "HomeAndConstructionBusiness",
-      "@id": "https://www.valiantdoor.com/#business",
-      name: "Valiant Garage Door LLC",
-      url: "https://www.valiantdoor.com/",
-      telephone: "+1-925-409-4974",
-      identifier: LICENSE_LABEL,
-      award: "Diamond Certified — Certificate #2953, since August 2026",
-      sameAs: [
-        "https://www.diamondcertified.org/report/valiant-garage-door/"
-      ],
-      hasCredential: {
-        "@type": "EducationalOccupationalCredential",
-        name: LICENSE_LABEL,
-        credentialCategory: "Contractor license"
-      }
-    });
-    document.head.appendChild(licenseSchema);
-  }
+  // Business identity and credentials are rendered in the HTML using
+  // lib/blog-business-schema.js, including pages served by the blog API.
 
   // ---- Microsoft Clarity: load on ALL pages, not just homepage ----
   // Previously this was trapped inside setupDeferredHomepageTracking() which
@@ -147,6 +129,7 @@
 
   document.addEventListener("submit", (event) => {
     if (!(event.target instanceof HTMLFormElement)) return;
+    if (!event.target.matches('form[action="/thank-you"], form[data-estimate-upload]')) return;
     trackValiantAction("lead_form_submit", {
       form_id: (event.target.id || "unlabeled").slice(0, 100)
     });
@@ -369,7 +352,7 @@
         </div>
         <nav class="global-footer-column" aria-label="Footer services"><h2>Services</h2><ul><li><a href="/new-garage-door-installation">New Door Installation</a></li><li><a href="/garage-door-repair">Garage Door Repair</a></li><li><a href="/garage-door-spring-replacement">Spring Replacement</a></li><li><a href="/garage-door-openers">Garage Door Openers</a></li><li><a href="/infinity-shield-garage-door-sensor">Infinity Shield</a></li><li><a href="/services/garage-door-maintenance">Maintenance</a></li><li><a href="/emergency-garage-door-repair">Emergency Repair</a></li></ul></nav>
         <nav class="global-footer-column" aria-label="Footer service areas"><h2>Service Areas</h2><ul><li><a href="/garage-door-repair-pleasanton">Pleasanton</a></li><li><a href="/garage-door-repair-dublin-ca">Dublin</a></li><li><a href="/garage-door-repair-livermore">Livermore</a></li><li><a href="/garage-door-repair-san-ramon">San Ramon</a></li><li><a href="/garage-door-repair-pleasant-hill">Pleasant Hill</a></li><li><a href="/service-areas">View All Areas</a></li></ul></nav>
-        <div class="global-footer-column"><h2>Contact</h2><ul><li><a class="js-tel" href="${PHONE_HREF}"><span class="js-phone">${PHONE}</span></a></li><li><a href="mailto:vm@valiantdoor.com">vm@valiantdoor.com</a></li><li><address style="font-style:normal;display:inline;">3588 Pimlico Dr, Pleasanton, CA 94588</address></li><li><strong>${LICENSE_LABEL}</strong></li><li>Insured</li><li><a href="${BOOK_URL}" target="_blank" rel="noopener noreferrer">Book Free Estimate</a></li></ul></div>
+        <div class="global-footer-column"><h2>Contact</h2><ul><li><a class="js-tel" href="${PHONE_HREF}"><span class="js-phone">${PHONE}</span></a></li><li><a href="mailto:vm@valiantdoor.com">vm@valiantdoor.com</a></li><li><address style="font-style:normal;display:inline;">3588 Pimlico Dr, Pleasanton, CA 94588</address></li><li><strong>${LICENSE_LABEL}</strong></li><li><a href="/credentials">Licensed, bonded &amp; insured</a></li><li><a href="${BOOK_URL}" target="_blank" rel="noopener noreferrer">Book Free Estimate</a></li></ul></div>
       </div>
       <div class="global-footer-bottom"><span>&copy; 2026 Valiant Garage Door LLC. All Rights Reserved. &nbsp;&bull;&nbsp; ${LICENSE_LABEL}</span><span><a href="/privacy">Privacy Policy</a> &nbsp;&bull;&nbsp; <a href="/terms">Terms of Service</a></span></div>
     </div>`;
