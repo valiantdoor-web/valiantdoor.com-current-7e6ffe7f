@@ -20,8 +20,9 @@ Starting production commit: 8e64926db0fb79718bbeb0d822b18ba627acb820
 | Internal links | Added relevant field-video links from 14 service/city pages. All **98** public video pages now have at least two referring pages. Added urgent repair request links from Services and Pleasanton. |
 | Services outline | Moved the H1 before the trust content, made trust labels ordinary text, and introduced an H2 above the service cards. |
 | Urgent repair page | Corrected its trailing-slash canonical, added useful visit/safety information, and made its issue selectors explicit buttons. |
-| Assets | Published minified versions of **17** referenced first-party assets with content-based cache versions. Combined source sizes: **118,902 bytes → 92,875 bytes** before transport compression. This is not a measured Core Web Vitals improvement. |
+| Assets | Published minified versions of **17** referenced first-party assets with content-based cache versions. Combined source sizes: **119,095 bytes → 93,004 bytes** before transport compression. This is not a measured Core Web Vitals improvement. |
 | Lead measurement | Removed the quote-page booking-click event that claimed a lead had been submitted. Booking clicks remain booking_click; accepted website forms retain lead_form_success and the existing Ads event. Added a shared-script initialization guard and restricted form-submit tracking to lead forms. |
+| Booking attribution | The urgent-repair page now carries Nextdoor tags only when an incoming Nextdoor source/click ID exists. Direct and internal website visits no longer get mislabeled as paid Nextdoor traffic. |
 | Existing CallRail integration | Allowed the specific script and connection hosts used by the installed website-pool script in Content Security Policy. The previous policy blocked its script loader. |
 | Publishing pipeline | The live blog renderer uses the same business normalization as static pages, including provider-supplied JSON-LD. The page-intent generator no longer creates an incomplete LocalBusiness stub. |
 | Production instructions | Corrected the historical repository/project-name references using the verified current production deployment. |
@@ -36,6 +37,7 @@ The source scan inspected **592 HTML files/templates** and validated **354 publi
 - All 98 public video pages have at least two referring pages.
 - Existing maintenance indexing, blog publishing and blog synchronization tests passed.
 - Regression tests passed for incomplete imported business stubs and credentials in the live blog index/article renderer.
+- Attribution regression tests passed for direct website visits, actual Nextdoor clicks, and organic Nextdoor visits.
 - Moenave and repair hero image/video sources were checked against the starting production commit.
 - Private listings/command-center app files were excluded from this release.
 

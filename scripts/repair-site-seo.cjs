@@ -103,6 +103,7 @@ for(const page of pages) {
       if(!html.includes('id="service-options-title"'))html=html.replace('<div class="services-grid">','<h2 id="service-options-title" class="visually-hidden">Repair and installation services</h2>\n<div class="services-grid">');
     }
     if(route==='/nextdoor-emergency-repair') {
+      html=html.replaceAll('Proof Before Proposition','Proof Before Proposal');
       html=html.replaceAll(SITE+'/nextdoor-emergency-repair/',SITE+'/nextdoor-emergency-repair');
       if(!html.includes('id="repair-visit-plan"'))html=html.replace('</main>',`<section class="proof" id="repair-visit-plan"><div><h2>What to expect from your repair visit</h2><p>Tell us whether the door is open, closed, crooked, or stuck partway, and whether you heard a loud bang or see a loose cable. Photos can help explain the issue before a visit. Keep people, pets, and vehicles clear of the opening, and stop using the opener when the door is damaged or unbalanced.</p><p>We inspect the door, springs, cables, tracks, rollers, and opener to identify the cause. You receive documented findings and clear repair options before approving work. After an approved repair, we check balance, travel, and safety operation. Dispatch timing depends on the route, technician availability, and required parts.</p><p><a href="/emergency-garage-door-repair">Emergency repair information</a> · <a href="/garage-door-repair-pleasanton">Pleasanton garage door service</a></p></div></section>\n</main>`);
       html=html.replace(/<button data-problem=/g,'<button type="button" data-problem=');
