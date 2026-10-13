@@ -24,7 +24,9 @@ test('live blog index and imported articles publish the same credentials and no 
   const businesses=businessNodes(html);assert.equal(businesses.length,1);
   assert.equal(businesses[0].hasCredential.identifier,'1160068');
   assert.equal(businesses[0].hasCertification.certificationIdentification,'2953');
+  assert.equal(businesses[0].additionalProperty.find(p=>p.name==='City of Pleasanton business license').value,'Valiant Garage Door LLC');
   assert.equal(businesses[0].additionalProperty.find(p=>p.name==="Workers' compensation record").value,'CSLB exemption for no employees; effective July 9, 2026.');
+  assert.match(html,/<dt>City business license<\/dt>/);
   assert.match(html,/data-valiant-credential-details/);assert.match(html,/CSG0050855800/);
  }
 });

@@ -6,6 +6,7 @@ private tools from search-page assertions. A real media link remains a link.
 """
 import json
 import re
+import subprocess
 import sys
 from collections import defaultdict
 from html.parser import HTMLParser
@@ -20,6 +21,14 @@ PRIVATE = ('/authority-dashboard', '/listings-admin', '/settings/', '/address-se
 CONFIG = json.loads((ROOT / 'vercel.json').read_text())
 REDIRECTS = {r['source']: r['destination'] for r in CONFIG['redirects'] if 'has' not in r and ':' not in r['source']}
 ERRORS = []
+# A sparse checkout can omit unchanged, committed media. Verify those targets
+# against its skip-worktree inventory rather than requiring a media download.
+try:
+    SPARSE_ASSETS = {ROOT / line[2:] for line in subprocess.check_output(
+        ['git', 'ls-files', '-t', '--', 'public/assets'], cwd=ROOT, text=True
+    ).splitlines() if line.startswith('S public/assets/')}
+except (OSError, subprocess.CalledProcessError):
+    SPARSE_ASSETS = set()
 
 class Page(HTMLParser):
     def __init__(self, file):
@@ -70,7 +79,7 @@ def exists(target):
         rel=pathname.removeprefix('/api/')
         return (ROOT/'api'/(rel+'.js')).is_file() or (ROOT/'api'/rel/'index.js').is_file()
     f=PUBLIC/pathname.lstrip('/')
-    return f.is_file() or f.with_suffix('.html').is_file() or (f/'index.html').is_file()
+    return f.is_file() or f in SPARSE_ASSETS or f.with_suffix('.html').is_file() or (f/'index.html').is_file()
 
 pages=[Page(f) for f in sorted(PUBLIC.rglob('*.html'))]+[Page(ROOT/'lib/blog-index.html')]
 descriptions=defaultdict(list); titles=defaultdict(list); incoming=defaultdict(set); public=[]
@@ -101,8 +110,10 @@ for p in pages:
         if b.get('hasCredential',{}).get('identifier')!='1160068': ERRORS.append(f'{r}: missing CSLB credential')
         if b.get('hasCertification',{}).get('certificationIdentification')!='2953': ERRORS.append(f'{r}: missing Diamond certificate')
         props=json.dumps(b.get('additionalProperty',[]))
+        if 'City of Pleasanton business license' not in props: ERRORS.append(f'{r}: missing municipal business license')
         if not all(value in props for value in ['101085976','ACC006A003914','CSG0050855800','July 5, 2027']): ERRORS.append(f'{r}: incomplete bond/insurance facts')
     if 'data-valiant-credential-details' not in p.html: ERRORS.append(f'{r}: credentials not visible in page content')
+    if '<dt>City business license</dt>' not in p.html: ERRORS.append(f'{r}: municipal business license not visible')
     scripts=[a for a in p.assets if '/js/global-chrome.' in a]
     if len(scripts)!=1: ERRORS.append(f'{r}: {len(scripts)} shared measurement scripts')
 for kind, values in [('title',titles),('description',descriptions)]:

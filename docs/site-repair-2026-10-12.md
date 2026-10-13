@@ -51,3 +51,15 @@ Semrush must recrawl to calculate a new health score. Its text/HTML-ratio, inten
 ## Review
 
 Start with /credentials, /services, /nextdoor-emergency-repair, /blog, /repair-guides, and a project/video page. Check the visible credentials, expandable video lists, navigation, mobile layout, and existing booking links. The liability coverage end date remains explicit so the record can be updated when coverage renews.
+
+## Business license correction — October 13, 2026
+
+Added the **City of Pleasanton business license** separately from California CSLB contractor license **1160068**. The municipal license now appears in the shared visible credentials and the business structured data, including the live blog renderer. The credentials page describes both licenses and links to the City's official license lookup.
+
+The City confirmed zoning approval and release of the business license in July 7, 2026 correspondence. That message does not supply the city certificate number or expiration date; neither was invented or substituted with an EIN, seller's permit, LLC entity number, or contractor license number.
+
+The credential renderer now refreshes an existing credentials section when its maintained facts change, preserving whether the section is expanded. This prevents old published sections from retaining an outdated list after a credential update.
+
+The production build and test workflow compile the maintained business profile and visible credential template into all **361 public pages/templates**, with **354 canonical public pages** checked by the site validator. Credential facts are maintained centrally; generated copies no longer need to be edited individually when a fact changes. The city business license remains distinct from the state contractor license, and Moenave's custom design remains intact.
+
+The full test suite and production build passed for this correction. The canonical-page scan found no missing visible municipal licenses or missing municipal-license structured data, while retaining the CSLB, Diamond Certified, bond, insurance and address checks.

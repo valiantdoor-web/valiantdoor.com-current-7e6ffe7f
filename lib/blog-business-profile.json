@@ -52,6 +52,7 @@
     "url": "https://www.diamondcertified.org/report/valiant-garage-door/"
   },
   "additionalProperty": [
+    {"@type": "PropertyValue", "name": "City of Pleasanton business license", "value": "Valiant Garage Door LLC", "url": "https://secure2.cityofpleasantonca.gov/websearch/"},
     {"@type": "PropertyValue", "name": "Contractor's bond", "value": "$25,000 with American Contractors Indemnity Company; bond 101085976; effective July 7, 2026."},
     {"@type": "PropertyValue", "name": "LLC employee/worker bond", "value": "$100,000 with Allegheny Casualty Company; bond ACC006A003914; effective July 8, 2026."},
     {"@type": "PropertyValue", "name": "Liability insurance", "value": "$2,000,000 with Spinnaker Insurance Company; policy CSG0050855800; effective July 5, 2026 through July 5, 2027."},
