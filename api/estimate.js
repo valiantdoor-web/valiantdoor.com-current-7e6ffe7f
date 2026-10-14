@@ -216,6 +216,11 @@ module.exports = async (req, res) => {
     ndclid: body.ndclid,
   };
 
+  Object.keys(body).filter((key) => /^attribution_(first|latest)_(utm_(source|medium|campaign|content|term)|gclid|gbraid|wbraid|ndclid|msclkid)$/.test(key))
+    .forEach((key) => {
+      if (typeof body[key] === 'string' && body[key].length <= 150) fields[key] = body[key];
+    });
+
   if (!fields.phone && !fields.email) {
     res.statusCode = 400;
     res.end(JSON.stringify({ ok: false, error: 'A phone number or email is required.' }));

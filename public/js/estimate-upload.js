@@ -6,7 +6,7 @@
 //   2. Uploads each photo to /api/estimate-photo (stored in private Blob).
 //   3. Posts the text fields + photo pathnames to /api/estimate, which emails
 //      the photos to the office and forwards the lead to Housecall Pro.
-//   4. Fires the Google Ads conversion, then redirects to /thank-you.
+//   4. Records the accepted lead in GA4, then redirects to /thank-you.
 //
 // Progressive enhancement: if anything fails, the customer sees the office
 // phone number so they are never blocked.
@@ -26,10 +26,16 @@
   var originalLabel = button ? button.textContent : 'Submit';
   var status = ensureStatusEl();
 
+  if (form.dataset.valiantEstimateBound) return;
+  form.dataset.valiantEstimateBound = 'true';
+  var inFlight = false;
   form.addEventListener('submit', function (e) {
     e.preventDefault();
+    if (inFlight) return;
+    inFlight = true;
     run().catch(function (err) {
       console.log('[v0] estimate-upload: unexpected error', err && err.message);
+      setBusy(false);
       fail('Sorry, something went wrong.');
     });
   });
@@ -80,10 +86,12 @@
       opening_height: fields.opening_height,
       floor_to_ceiling_height: fields.floor_to_ceiling_height,
       notes: fields.notes,
-      source: window.location.href,
+      source: window.location.origin + window.location.pathname,
       ndclid: readCookie('vg_ndclid') || undefined,
       photoPathnames: pathnames
     };
+
+    Object.assign(payload, window.ValiantAnalytics ? window.ValiantAnalytics.attribution() : {});
 
     var result;
     try {
@@ -93,7 +101,7 @@
         body: JSON.stringify(payload)
       });
       result = await resp.json().catch(function () {
-        return { ok: resp.ok };
+        return { ok: false };
       });
     } catch (err) {
       console.log('[v0] estimate-upload: finalize error', err && err.message);
@@ -102,7 +110,7 @@
       return;
     }
 
-    if (!result || !result.ok) {
+    if (!resp || !resp.ok || !result || !result.ok) {
       setBusy(false);
       fail((result && result.error) || 'We could not submit your request.');
       return;
@@ -179,7 +187,7 @@
       body: JSON.stringify(prepared)
     });
     var json = await resp.json().catch(function () {
-      return { ok: resp.ok };
+      return { ok: false };
     });
     if (!json || !json.ok || !json.pathname) {
       throw new Error((json && json.error) || 'upload_failed');
@@ -226,27 +234,16 @@
   }
 
   function fireConversionThen(done) {
-    var finished = false;
-    var finish = function () {
-      if (finished) return;
-      finished = true;
-      done();
-    };
-    if (typeof window.gtag === 'function') {
-      window.gtag('event', 'ads_conversion_Submit_lead_form_1', {
-        event_callback: finish,
-        event_timeout: 1500
-      });
-      window.gtag('event', 'lead_form_success', {
-        form_source: window.location.pathname
-      });
-      window.setTimeout(finish, 1500);
+    if (window.ValiantAnalytics) {
+      window.ValiantAnalytics.leadAccepted(form.id || 'instant_estimate', done);
     } else {
-      finish();
+      // Measurement must never block customer delivery or manufacture success.
+      done();
     }
   }
 
   function setBusy(busy) {
+    if (!busy) inFlight = false;
     if (button) {
       button.disabled = busy;
       if (busy) button.textContent = 'Sending...';
@@ -276,6 +273,7 @@
   }
 
   function fail(message) {
+    inFlight = false;
     setBusy(false);
     if (status) {
       status.style.color = '#b00020';
