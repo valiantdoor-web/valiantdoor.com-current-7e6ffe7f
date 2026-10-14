@@ -1,7 +1,6 @@
 // Customer lead capture -> Housecall Pro (via /api/lead).
 // Replaces the former SureFire Local / promio.com form hijack.
-// Progressive enhancement: if JS or the API fails, the form still submits
-// normally to /thank-you so the customer is never blocked.
+// On API failure, show an error and keep the form available for retry.
 (function () {
   'use strict';
 
@@ -15,33 +14,14 @@
     return match ? decodeURIComponent(match[1]) : '';
   }
 
-  // Fires the same Google Ads lead conversion event that estimate-upload.js
-  // fires on a real successful photo-estimate submission. Previously this
-  // file redirected to /thank-you on success WITHOUT firing any conversion
-  // event at all, so real, successful lead submissions through this form
-  // (homepage lead form, Nominate A Family, Partner Intake) were invisible
-  // to GA4/Google Ads. The only conversion firing anywhere on the site was
-  // a mere CLICK on a Book Free Estimate link (see setupGoogleAdsQuoteConversion
-  // in main.min.js), which fires even if the visitor never actually books.
+  // Record the accepted lead once in the official GA4 stream. Attempts and
+  // booking-link clicks never fire this key event.
   function fireConversionThen(done) {
-    var finished = false;
-    var finish = function () {
-      if (finished) return;
-      finished = true;
-      done();
-    };
-    if (typeof window.gtag === 'function') {
-      window.gtag('event', 'ads_conversion_Submit_lead_form_1', {
-        event_callback: finish,
-        event_timeout: 1500,
-      });
-      window.gtag('event', 'lead_form_success', {
-        event_callback: function () {},
-        form_source: window.location.pathname,
-      });
-      window.setTimeout(finish, 1500);
+    if (window.ValiantAnalytics) {
+      window.ValiantAnalytics.leadAccepted('website_lead', done);
     } else {
-      finish();
+      // Measurement must never block customer delivery or manufacture success.
+      done();
     }
   }
 
@@ -49,8 +29,13 @@
     // The instant estimate form uploads photos and is handled by
     // estimate-upload.js; skip it here to avoid a double submission.
     if (form.hasAttribute('data-estimate-upload')) return;
+    if (form.dataset.valiantLeadBound) return;
+    form.dataset.valiantLeadBound = 'true';
+    var inFlight = false;
     form.addEventListener('submit', function (e) {
       e.preventDefault();
+      if (inFlight) return;
+      inFlight = true;
 
       var button = form.querySelector('[type="submit"]');
       var originalLabel = button ? button.textContent : '';
@@ -61,7 +46,8 @@
 
       // Collect text fields; skip file inputs (photos can't be forwarded to
       // the lead API), but record whether any were selected.
-      var data = { source: window.location.href };
+      var data = Object.assign({ source: window.location.origin + window.location.pathname },
+        window.ValiantAnalytics ? window.ValiantAnalytics.attribution() : {});
       var ndclid = readCookie('vg_ndclid');
       if (ndclid) data.ndclid = ndclid;
       var hasPhotos = false;
@@ -82,9 +68,8 @@
         body: JSON.stringify(data),
       })
         .then(function (res) {
-          return res.json().catch(function () {
-            return { ok: res.ok };
-          });
+          return res.json().catch(function () { return { ok: false }; })
+            .then(function (result) { return res.ok ? result : { ok: false }; });
         })
         .then(function (result) {
           if (result && result.ok) {
@@ -92,10 +77,12 @@
               window.location.href = '/thank-you';
             });
           } else {
+            inFlight = false;
             showError(form, button, originalLabel, result && result.error);
           }
         })
         .catch(function () {
+          inFlight = false;
           showError(form, button, originalLabel);
         });
     });

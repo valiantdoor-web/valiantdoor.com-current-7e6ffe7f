@@ -327,6 +327,7 @@ const setupDeferredHomeHousecallEmbeds = () => {
 
 
 const setupDeferredHomepageTracking = () => {
+  if (!/^(?:www\.)?valiantdoor\.(?:com|io)$/.test(window.location.hostname)) return;
   if (!document.body?.classList.contains("page-home")) return;
   if (window.__valiantHomepageTrackingDeferred === true) return;
   window.__valiantHomepageTrackingDeferred = true;
@@ -1355,87 +1356,9 @@ const setupNextdoorClickIdStorage = () => {
 
 setupNextdoorClickIdStorage();
 
-const setupNextdoorCapiLead = () => {
-  if (normalizePath(window.location.pathname) !== "/thank-you") return;
+// A thank-you page visit does not establish a booked job. Nextdoor lead/job
+// outcomes are relayed from the accepted HCP records, not arbitrary page views.
 
-  const readStorage = (storage, key) => {
-    try {
-      return storage.getItem(key) || "";
-    } catch (error) {
-      return "";
-    }
-  };
-
-  const writeStorage = (storage, key, value) => {
-    try {
-      storage.setItem(key, value);
-    } catch (error) {}
-  };
-
-  const params = new URLSearchParams(window.location.search);
-  const contactInformation = params.get("contact_information") || "";
-  const name = params.get("name") || "";
-  const nameParts = name.trim().split(/\s+/).filter(Boolean);
-  const emailFromContact = /@/.test(contactInformation) ? contactInformation : "";
-  const phoneFromContact = /\d{7,}/.test(contactInformation.replace(/\D/g, "")) ? contactInformation : "";
-
-  let externalId = readStorage(window.localStorage, "valiant_nextdoor_external_id");
-  if (!externalId) {
-    externalId = window.crypto?.randomUUID ? window.crypto.randomUUID() : `valiant-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-    writeStorage(window.localStorage, "valiant_nextdoor_external_id", externalId);
-  }
-
-  const eventStorageKey = `valiant_nextdoor_capi_lead:${window.location.pathname}:${window.location.search}`;
-  if (readStorage(window.sessionStorage, eventStorageKey)) return;
-
-  const eventId = window.crypto?.randomUUID ? window.crypto.randomUUID() : `lead-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-  writeStorage(window.sessionStorage, eventStorageKey, eventId);
-
-  const payload = {
-    event_name: "lead",
-    event_id: eventId,
-    action_source: "website",
-    action_source_url: `${window.location.origin}${window.location.pathname}`,
-    customer: {
-      email: params.get("email") || emailFromContact,
-      phone_number: params.get("phone") || params.get("phone_number") || phoneFromContact,
-      first_name: params.get("first_name") || nameParts[0] || "",
-      last_name: params.get("last_name") || nameParts.slice(1).join(" ") || "",
-      date_of_birth: params.get("date_of_birth") || "",
-      gender: params.get("gender") || "",
-      street_address: params.get("street_address") || "",
-      city: params.get("city") || "",
-      state: params.get("state") || "CA",
-      zip_code: params.get("zip_code") || params.get("zip") || "",
-      country: params.get("country") || "US",
-      external_id: externalId,
-      click_id: params.get("ndclid") || readStorage(window.localStorage, "valiant_nextdoor_click_id")
-    },
-    custom: {
-      conversion_type: "service_booking",
-      booking_status: "booked",
-      problem_type: params.get("problem_type") || "",
-      source_path: window.location.pathname
-    }
-  };
-
-  window.dataLayer = window.dataLayer || [];
-  window.dataLayer.push({
-    event: "service_booking_complete",
-    booking_status: "booked",
-    traffic_source: params.get("utm_source") || "",
-    problem_type: params.get("problem_type") || ""
-  });
-
-  fetch("/api/nextdoor-capi", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/json" },
-    body: JSON.stringify(payload),
-    keepalive: true
-  }).catch(() => {});
-};
-
-setupNextdoorCapiLead();
 
 // Booking links are measured as booking_click by global-chrome.js. Successful
 // website form submissions emit lead_form_success and the existing Ads event

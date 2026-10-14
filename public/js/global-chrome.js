@@ -11,6 +11,71 @@
   const LICENSE_LABEL = `CA Contractor License #${LICENSE_NUMBER}`;
   const BOOK_URL = "https://book.housecallpro.com/book/Valiant-Garage-Door/ae8e4a137c8c49b4b264073541533a7a?v2=true";
   const currentPath = window.location.pathname.replace(/\/+$/, "") || "/";
+  const measurementId = "G-RVSWB9D2M5";
+  const productionHost = /^(?:www\.)?valiantdoor\.(?:com|io)$/.test(window.location.hostname);
+
+  // Keep campaign provenance with a lead when it leaves its landing page.
+  // Only allow marketing labels and click IDs; never store form/contact data.
+  const attributionFields = (() => {
+    const key = "valiant_marketing_attribution_v1";
+    const clean = (value) => {
+      const text = String(value || "").trim();
+      return text.length <= 150 && !/[\r\n<>@]/.test(text) ? text : "";
+    };
+    const params = new URLSearchParams(window.location.search);
+    let saved = {};
+    try {
+      saved = JSON.parse(window.localStorage.getItem(key) || "{}") || {};
+      if (!saved.updated || Date.now() - saved.updated > 90 * 86400000) saved = {};
+    } catch (_error) { saved = {}; }
+    const touch = {};
+    ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "gclid", "gbraid", "wbraid", "ndclid", "msclkid"].forEach((name) => {
+      const value = clean(params.get(name));
+      if (value) touch[name] = value;
+    });
+    if (!touch.utm_source && (touch.gclid || touch.gbraid || touch.wbraid)) {
+      touch.utm_source = "google"; touch.utm_medium = "cpc";
+    }
+    if (!touch.utm_source && touch.ndclid) {
+      touch.utm_source = "nextdoor"; touch.utm_medium = "paid_social";
+    }
+    if (!touch.utm_source && touch.msclkid) {
+      touch.utm_source = "bing"; touch.utm_medium = "cpc";
+    }
+    if (!touch.utm_source) {
+      try {
+        const host = new URL(document.referrer).hostname.toLowerCase();
+        if (!/^(?:www\.)?valiantdoor\.(?:com|io)$/.test(host) &&
+            !/(?:^|\.)(?:housecallpro\.com|vercel\.com|vercel\.app|cloudflarebrowser\.com)$/.test(host)) {
+          touch.utm_source = /(^|\.)google\.[a-z.]+$/.test(host) ? "google" : /(^|\.)bing\.com$/.test(host) ? "bing" : host;
+          touch.utm_medium = ["google", "bing"].includes(touch.utm_source) ? "organic" : "referral";
+        }
+      } catch (_error) {}
+    }
+    if (touch.utm_source) {
+      saved.first = saved.first || touch;
+      saved.latest = touch;
+      saved.updated = Date.now();
+      try { window.localStorage.setItem(key, JSON.stringify(saved)); } catch (_error) {}
+    }
+    const fields = {};
+    ["first", "latest"].forEach((kind) => {
+      ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "gclid", "gbraid", "wbraid", "ndclid", "msclkid"].forEach((name) => {
+        const value = clean(saved[kind] && saved[kind][name]);
+        if (value) fields["attribution_" + kind + "_" + name] = value;
+      });
+    });
+    return fields;
+  })();
+  const safePageLocation = (() => {
+    const url = new URL(window.location.href);
+    const allowed = new Set(["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "gclid", "gbraid", "wbraid", "ndclid", "msclkid"]);
+    Array.from(url.searchParams.keys()).forEach((name) => {
+      if (!allowed.has(name)) url.searchParams.delete(name);
+    });
+    url.hash = "";
+    return url.href;
+  })();
 
   // Business identity and credentials are rendered in the HTML using
   // lib/blog-business-schema.js, including pages served by the blog API.
@@ -35,7 +100,7 @@
   // Keep a single Google tag queue and one official GA4 destination while
   // preserving the verified Google Ads destinations.
   (function loadValiantGa4() {
-    const measurementId = "G-RVSWB9D2M5";
+    if (!productionHost) return;
     const adsDestinations = ["AW-17968443655", "AW-17909190639"];
     window.dataLayer = window.dataLayer || [];
     window.gtag = window.gtag || function () {
@@ -73,7 +138,7 @@
       window.gtag("js", new Date());
     }
     if (!alreadyConfigured) {
-      window.gtag("config", measurementId);
+      window.gtag("config", measurementId, { page_location: safePageLocation });
     }
     adsDestinations.forEach((destinationId) => {
       const destinationConfigured = window.dataLayer.some((entry) => {
@@ -84,7 +149,7 @@
         }
       });
       if (!destinationConfigured) {
-        window.gtag("config", destinationId);
+        window.gtag("config", destinationId, { page_location: safePageLocation });
       }
     });
   })();
@@ -92,12 +157,33 @@
   // Record high-intent actions without sending customer-entered values or
   // converting ordinary clicks into Google Ads conversions.
   const trackValiantAction = (eventName, parameters = {}) => {
-    if (typeof window.gtag !== "function") return;
+    if (!productionHost || typeof window.gtag !== "function") return;
     window.gtag("event", eventName, {
       page_path: currentPath,
+      page_location: safePageLocation,
       transport_type: "beacon",
-      ...parameters
+      ...parameters,
+      // Default routing broadcasts to every configured Ads/GA destination.
+      // Action measurements belong to this GA4 stream only.
+      send_to: measurementId
     });
+  };
+  window.ValiantAnalytics = {
+    productionHost,
+    attribution: () => ({ ...attributionFields }),
+    track: trackValiantAction,
+    leadAccepted: (formId, done) => {
+      let finished = false;
+      const finish = () => { if (!finished) { finished = true; done(); } };
+      if (!productionHost || typeof window.gtag !== "function") return finish();
+      const details = { form_id: formId || "website_lead", form_source: currentPath };
+      trackValiantAction("lead_form_success", details);
+      // Retain the already-configured key-event name, only after API success.
+      trackValiantAction("ads_conversion_Submit_lead_form_1", {
+        ...details, event_callback: finish, event_timeout: 1500
+      });
+      window.setTimeout(finish, 1500);
+    }
   };
 
   document.addEventListener("click", (event) => {
@@ -130,7 +216,7 @@
   document.addEventListener("submit", (event) => {
     if (!(event.target instanceof HTMLFormElement)) return;
     if (!event.target.matches('form[action="/thank-you"], form[data-estimate-upload]')) return;
-    trackValiantAction("lead_form_submit", {
+    trackValiantAction("lead_form_attempt", {
       form_id: (event.target.id || "unlabeled").slice(0, 100)
     });
   });
