@@ -2,6 +2,8 @@ const test=require('node:test');
 const assert=require('node:assert/strict');
 const {normalizeGraph,profile}=require('../lib/blog-business-schema');
 const {renderArticle,renderIndex}=require('../lib/blog-publishing');
+const fs=require('node:fs');
+const path=require('node:path');
 function businessNodes(html){
  const values=[...html.matchAll(/<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)].map(m=>JSON.parse(m[1]));
  const nodes=[];
@@ -28,5 +30,28 @@ test('live blog index and imported articles publish the same credentials and no 
   assert.equal(businesses[0].additionalProperty.find(p=>p.name==="Workers' compensation record").value,'CSLB exemption for no employees; effective July 9, 2026.');
   assert.match(html,/<dt>City business license<\/dt>/);
   assert.match(html,/data-valiant-credential-details/);assert.match(html,/CSG0050855800/);
+ }
+});
+test('customer testimonials remain visible without unsupported service or self-serving business review markup',()=>{
+ const pages=[
+  ['wayne-dalton-torsion-conversion','Veerraju Amanchi'],
+  ['case-studies/pleasanton-garage-door-spring-repair','Vikram Gupta'],
+  ['blog/pleasanton-garage-door-spring-repair-case-study','Vikram Gupta'],
+ ];
+ for(const [route,author] of pages){
+  const html=fs.readFileSync(path.join(__dirname,'../public',route,'index.html'),'utf8');
+  const graphs=[...html.matchAll(/<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)].map(m=>JSON.parse(m[1]));
+  const walk=value=>{
+   if(Array.isArray(value))value.forEach(walk);
+   else if(value&&typeof value==='object'){
+    assert.ok(![value['@type']].flat().includes('Review'),`${route}: unsupported Review node`);
+    assert.equal(value.review,undefined,`${route}: dangling review reference`);
+    Object.values(value).forEach(walk);
+   }
+  };
+  graphs.forEach(walk);
+  const visible=html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'');
+  assert.ok(visible.includes(author),`${route}: testimonial author is still visible`);
+  assert.equal(businessNodes(html).length,1,`${route}: company identity is retained`);
  }
 });
