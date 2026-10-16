@@ -402,6 +402,18 @@
       "sitemap_label": "Thank You",
       "include_in_sitemap": false,
       "include_in_llms": false
+    },
+    {
+      "route": "/nextdoor-emergency-repair",
+      "file": "public/nextdoor-emergency-repair/index.html",
+      "intent": "urgent_repair_request",
+      "title": "Emergency Garage Door Repair Pleasanton | Valiant Garage Door",
+      "description": "Garage door stuck, spring broken, cable off, or door off track? Call Valiant Garage Door in Pleasanton for clear repair options.",
+      "canonical": "https://www.valiantdoor.com/nextdoor-emergency-repair",
+      "sitemap_category": "Service Pages",
+      "sitemap_label": "Request urgent garage door repair",
+      "include_in_sitemap": true,
+      "include_in_llms": true
     }
   ]
 }
