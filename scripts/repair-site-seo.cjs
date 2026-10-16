@@ -118,6 +118,7 @@ for(const page of pages) {
     }
     html=html.replace(/(<a[^>]*href="\/about-valentino-ramirez"[^>]*>About Valentino<\/a>)/g,'$1<a href="/credentials">License, Bonds &amp; Insurance</a>');
     if(route==='/site-map'&&!html.includes('data-credential-sitemap-link'))html=html.replace('</main>','<p data-credential-sitemap-link><a href="/credentials">License, certification, bonds &amp; insurance</a></p>\n</main>');
+    if(route==='/site-map'&&!html.includes('data-emergency-request-sitemap-link'))html=html.replace('</main>','<p data-emergency-request-sitemap-link><a href="/nextdoor-emergency-repair">Request urgent garage door repair</a></p>\n</main>');
     html=addCredentialDetails(html);
     if(route==='/credentials')html=html.replace(/(<aside[^>]*data-valiant-credential-details[^>]*>\s*)<details>/,'$1<details open>');
     if(!html.includes('/js/global-chrome.'))html=html.replace('</body>','<script src="/js/global-chrome.js" defer></script>\n</body>');
@@ -138,5 +139,8 @@ for(const page of pages) {
 }
 const sitemap=path.join(PUBLIC,'sitemap-pages.xml');
 let xml=fs.readFileSync(sitemap,'utf8');
-if(!xml.includes(SITE+'/credentials'))fs.writeFileSync(sitemap,xml.replace('</urlset>','<url><loc>'+SITE+'/credentials</loc></url>\n</urlset>'));
+for(const route of ['/credentials','/nextdoor-emergency-repair']) {
+  if(!xml.includes('<loc>'+SITE+route+'</loc>'))xml=xml.replace('</urlset>','<url><loc>'+SITE+route+'</loc></url>\n</urlset>');
+}
+fs.writeFileSync(sitemap,xml);
 console.log(JSON.stringify(report,null,2));

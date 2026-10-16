@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the maintenance page remains indexable and canonical.
+"""Validate priority service pages remain discoverable, indexable and canonical.
 
 This catches the exact class of issue from Search Console: typo/slash URLs,
 robots blocks, and sitemap/canonical drift for the maintenance page.
@@ -65,6 +65,43 @@ for xml_file in xml_files:
 if not seen_canonical:
     fail("canonical maintenance URL is missing from sitemap XML files")
 
+# Protect public service URLs named in the Search Console investigation.
+priority_routes = [
+    "/nextdoor-emergency-repair", "/emergency-garage-door-repair",
+    "/garage-door-repair-pleasanton", "/garage-door-repair-pleasant-hill",
+    "/garage-door-repair-san-ramon", "/idea-certified-garage-door-technician",
+    "/videos/how-to/how-do-you-repair-and-hide-garage-door-sensor-wiring",
+]
+sitemap_urls = set()
+for xml_file in xml_files:
+    try:
+        root = ET.fromstring(xml_file.read_text(encoding="utf-8"))
+        sitemap_urls.update(node.text.strip() for node in root.findall("{*}url/{*}loc") if node.text)
+    except ET.ParseError:
+        pass  # Reported above.
+for route in priority_routes:
+    page = PUBLIC / route.lstrip("/") / "index.html"
+    if not page.exists():
+        fail(f"priority page is missing: {route}")
+        continue
+    content = page.read_text(encoding="utf-8")
+    expected = "https://www.valiantdoor.com" + route
+    found = re.findall(r"""<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["']""", content, re.I)
+    if found != [expected]:
+        fail(f"{route}: expected self-canonical {expected}; found {found!r}")
+    if re.search(r"""<meta[^>]+name=["'](?:robots|googlebot)["'][^>]+content=["'][^"']*noindex""", content, re.I):
+        fail(f"{route}: public service page must not be noindex")
+    if expected not in sitemap_urls:
+        fail(f"{route}: missing from XML sitemaps")
+
+# The formerly noindex urgent request page also needs a human-facing discovery path.
+site_map = (PUBLIC / "site-map/index.html").read_text(encoding="utf-8")
+if 'href="/nextdoor-emergency-repair"' not in site_map:
+    fail("HTML site map must link to the urgent repair request page")
+intents = json.loads((ROOT / "data/page_intents.json").read_text(encoding="utf-8"))["pages"]
+if not any(p.get("route") == "/nextdoor-emergency-repair" and p.get("include_in_sitemap") for p in intents):
+    fail("page-intent sitemap generator must retain the urgent repair request URL")
+
 # Internal links should point to the canonical no-slash path, not the typo or slash variant.
 for path in PUBLIC.rglob("*.html"):
     rel = path.relative_to(ROOT)
@@ -105,4 +142,4 @@ if errors:
         print(f"- {error}")
     sys.exit(1)
 
-print("Indexing contract passed for maintenance page canonical, robots, redirects, and sitemap entries.")
+print("Indexing contract passed for maintenance redirects and priority-page canonicals, robots, and sitemap entries.")
