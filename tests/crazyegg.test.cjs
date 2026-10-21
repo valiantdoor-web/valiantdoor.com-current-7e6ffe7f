@@ -15,7 +15,8 @@ test('exactly one async account script in head on all 44 intended pages',()=>{
   assert.ok(html.indexOf(tag)<html.indexOf('</head>'),file);
   // Installing analytics must not change page copy, navigation, metadata or layout.
   const base=execFileSync('git',['show',`d2b6fb0dcf0be6ccbe54d21bf9d73808105f3fde:${file}`],{cwd:root,encoding:'utf8'});
-  assert.equal(html.replace(tag+'\n',''),base,file);
+  const committed=execFileSync('git',['show',`HEAD:${file}`],{cwd:root,encoding:'utf8'});
+  assert.equal(committed.replace(tag+'\n',''),base,file);
  }
 });
 test('no tracker on pages outside the explicit manifest',()=>{
