@@ -557,4 +557,20 @@
       if (wasServicesOpen) servicesToggle.focus();
     }
   });
+
+  // Install the existing company snippet on every public production page,
+  // after the shared header/footer have created their phone links. Loading it
+  // once lets CallRail own the visitor session and all number replacements.
+  // Do not load it on previews or private tools, or manufacture call events
+  // from phone-button clicks. Pool sizing and integrations live in CallRail.
+  (function loadValiantCallRail() {
+    if (!productionHost || /^\/(?:authority-dashboard|listings-admin|settings|address-selection-hidden)(?:\/|$)/.test(currentPath)) return;
+    if (document.querySelector('script[data-valiant-callrail], script[src*="callrail.com/companies/459145898/"][src*="/swap.js"]')) return;
+
+    const script = document.createElement("script");
+    script.src = "https://cdn.callrail.com/companies/459145898/dd6c77c15a4679e36b2a/12/swap.js";
+    script.async = true;
+    script.dataset.valiantCallrail = "459145898";
+    (document.head || document.documentElement).appendChild(script);
+  })();
 })();
