@@ -16,7 +16,7 @@
     "sync:reviews": "node --env-file-if-exists=/vercel/share/.env.project scripts/sync-review-schema.mjs",
     "index:site": "node index-site.js",
     "search-console:dry-run": "node index-site.js --dry-run",
-    "test:tracking": "node --test tests/marketing-tracking.test.cjs"
+    "test:tracking": "node --test tests/marketing-tracking.test.cjs tests/callrail-dni.test.cjs"
   },
   "repository": {
     "type": "git",
