@@ -36,6 +36,8 @@ test('all seven core cities have at least 30 distinct indexable static linking p
   for(const [route,sources] of incoming)assert.ok(sources.size>=30,`${route}: ${sources.size}`);
 });
 test('additions only link existing routes and retain canonical and existing indexing contracts',()=>{
+  const redirectSources=new Set(require('../vercel.json').redirects.map(rule=>rule.source));
+  assert.ok(areaSources.every(route=>!redirectSources.has('/'+route)),'no link blocks are added to redirect-only pages');
   for(const route of new Set([...areaSources,...guides.keys()])){
     const $=load(read(route));const source=$('link[rel="canonical"]').attr('href');
     assert.ok(source,'canonical retained: '+route);

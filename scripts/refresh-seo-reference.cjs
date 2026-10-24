@@ -17,7 +17,7 @@ const areaSources = ['', 'services', 'service-areas', 'garage-door-repair', ...c
   'new-garage-door-installation','wayne-dalton-torsion-conversion','infinity-shield-garage-door-sensor',
   'valiant-signature-opener-mount','valiant-carriage-door-restorations',
   'broken-spring-repair-dublin-ca','garage-door-repair-east-dublin','e900-tilt-up-garage-door-repair',
-  'emergency-after-hours','repair-guides', 'services/commercial'];
+  'repair-guides', 'services/commercial'];
 const titles = {
   '': 'Garage Door Repair Pleasanton & Tri-Valley | Valiant Garage Door',
   'garage-door-repair-san-ramon': 'Garage Door Repair San Ramon, CA | Same-Day | Valiant',
