@@ -14,7 +14,7 @@ module.exports = async (req,res) => {
     if(slug) {
       const article = values.find(a=>a.slug === slug && publishing.languageKey(a) === language);
       if(!article) {res.statusCode=404;return res.end('Article not found');}
-      html = publishing.renderArticle(article);
+      html = publishing.renderArticle(article, values);
     } else html = sitemap ? publishing.renderSitemap(values) : publishing.renderIndex(values);
     res.statusCode=200;return res.end(req.method === 'HEAD'?'':html);
   } catch(error) {

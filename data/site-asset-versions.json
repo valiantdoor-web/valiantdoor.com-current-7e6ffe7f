@@ -37,5 +37,9 @@
   "/css/credentials-theme.css": "/css/credentials-theme.min.css?v=20fdeac14cf5",
   "/css/credentials-theme.min.css": "/css/credentials-theme.min.css?v=20fdeac14cf5",
   "/js/credentials-theme.js": "/js/credentials-theme.min.js?v=ecaaee94cc33",
-  "/js/credentials-theme.min.js": "/js/credentials-theme.min.js?v=ecaaee94cc33"
+  "/js/credentials-theme.min.js": "/js/credentials-theme.min.js?v=ecaaee94cc33",
+  "/css/review-excerpts.css": "/css/review-excerpts.min.css?v=2fe98a1378df",
+  "/css/review-excerpts.min.css": "/css/review-excerpts.min.css?v=2fe98a1378df",
+  "/css/wayne-dalton.css": "/css/wayne-dalton.min.css?v=19e0dc75d269",
+  "/css/wayne-dalton.min.css": "/css/wayne-dalton.min.css?v=19e0dc75d269"
 }
