@@ -1,0 +1,7 @@
+.valiant-seo-reference{margin:2rem auto;padding:1.25rem;max-width:72rem;box-sizing:border-box;border:1px solid rgba(180,150,90,.35);border-radius:.75rem;background:#151517;color:#f5f2eb}
+.valiant-seo-reference h2{font-size:1.35rem;line-height:1.35;margin:0 0 .8rem}
+.valiant-seo-reference ul{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,16rem),1fr));gap:.65rem 1.5rem;padding-left:1.25rem;margin:0}
+.valiant-seo-reference a{color:#f4d99b;text-decoration:underline;text-underline-offset:.18em;overflow-wrap:anywhere}
+.valiant-seo-reference a:focus-visible{outline:2px solid currentColor;outline-offset:4px}
+.valiant-seo-reference p{margin:0;line-height:1.65}
+@media(max-width:600px){.valiant-seo-reference{width:calc(100% - 2rem);padding:1rem;margin:1.25rem auto}}
