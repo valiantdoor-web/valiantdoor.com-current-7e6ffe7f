@@ -5,12 +5,14 @@ const path = require('node:path');
 const {load} = require('cheerio');
 function refresh(root = path.resolve(__dirname, '..')) {
   const directory = path.join(root, 'public/portfolio/projects');
+  const sitemap=fs.readFileSync(path.join(root,'public/sitemap-portfolio.xml'),'utf8');
+  const published=new Set([...sitemap.matchAll(/<loc>https:\/\/www\.valiantdoor\.com\/portfolio\/projects\/(\d+)<\/loc>/g)].map(m=>m[1]));
   const projects = fs.readdirSync(directory, {withFileTypes:true})
     .filter(e => e.isDirectory() && /^\d+$/.test(e.name) && fs.existsSync(path.join(directory,e.name,'index.html')))
     .map(e => {
       const file=path.join(directory,e.name,'index.html'), html=fs.readFileSync(file,'utf8'), $=load(html);
-      return {id:e.name,file,html,title:$('title').text().replace(/\s*\|\s*Valiant Garage Door$/, '')};
-    }).sort((a,b)=>a.id.localeCompare(b.id,undefined,{numeric:true}));
+      return {id:e.name,file,html,indexable:!$('meta[name="robots"]').attr('content')?.includes('noindex'),title:$('title').text().replace(/\s*\|\s*Valiant Garage Door$/, '')};
+    }).filter(p=>published.has(p.id)&&p.indexable).sort((a,b)=>a.id.localeCompare(b.id,undefined,{numeric:true}));
   const escape = s => s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   if (projects.length < 2) return 0;
   let changed=0;

@@ -12,7 +12,11 @@ test('all published project pages gain two valid sibling links; originals and id
  try{
   const source=path.resolve(__dirname,'../public/portfolio/projects'),dest=path.join(dir,'public/portfolio/projects');
   fs.cpSync(source,dest,{recursive:true});
-  const ids=fs.readdirSync(dest).filter(id=>/^\d+$/.test(id));
+  fs.copyFileSync(path.resolve(__dirname,'../public/sitemap-portfolio.xml'),path.join(dir,'public/sitemap-portfolio.xml'));
+  const allIds=fs.readdirSync(dest).filter(id=>/^\d+$/.test(id));
+  const sitemap=fs.readFileSync(path.join(dir,'public/sitemap-portfolio.xml'),'utf8');
+  const ids=allIds.filter(id=>sitemap.includes('/portfolio/projects/'+id+'</loc>'));
+  const excluded=new Map(allIds.filter(id=>!ids.includes(id)).map(id=>[id,fs.readFileSync(path.join(dest,id,'index.html'),'utf8')]));
   for(const id of ids){const f=path.join(dest,id,'index.html');fs.writeFileSync(f,fs.readFileSync(f,'utf8').replace(/<section\b[^>]*data-valiant-related-projects[^>]*>[\s\S]*?<\/section>/g,''));}
   const originals=new Map(ids.map(id=>[id,fs.readFileSync(path.join(dest,id,'index.html'),'utf8')]));
   assert.equal(refresh(dir),ids.length);
@@ -25,6 +29,8 @@ test('all published project pages gain two valid sibling links; originals and id
   }
   for(const count of incoming.values())assert.equal(count.size,2);
   assert.equal(refresh(dir),0);
+  for(const [id,html] of excluded)assert.equal(fs.readFileSync(path.join(dest,id,'index.html'),'utf8'),html);
+  assert.equal(excluded.size,217);
  }finally{fs.rmSync(dir,{recursive:true,force:true})}
 });
 test('short search titles preserve full article headings and provide two language-safe incoming links',()=>{
