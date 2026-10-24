@@ -28,3 +28,12 @@ test('FAQ page preserves all 14 existing answers without changing their text',()
  const questions = html => { const $=load(html); const out=[]; $('script[type="application/ld+json"]').each((i,e)=>{const d=JSON.parse($(e).text());for(const n of d['@graph']||[d])if(n['@id']==='https://www.valiantdoor.com/faq#faq')out.push(...n.mainEntity);});return out; };
  assert.equal(questions(actual).length,14);assert.deepEqual(questions(actual),questions(old));
 });
+test('E900 hardware is an informational reference, not an unsupported priced-product snippet',()=>{
+ const file=path.join(root,'public/e900-tilt-up-garage-door-repair/index.html');
+ const $=load(fs.readFileSync(file,'utf8'));const nodes=[];
+ $('script[type="application/ld+json"]').each((i,e)=>{const d=JSON.parse($(e).text());nodes.push(...(d['@graph']||[d]));});
+ const hardware=nodes.find(n=>n['@id']==='https://www.valiantdoor.com/e900-tilt-up-garage-door-repair#e900');
+ assert.equal(hardware['@type'],'Thing');assert.equal(hardware.offers,undefined);assert.equal(hardware.review,undefined);assert.equal(hardware.aggregateRating,undefined);
+ assert.equal(hardware.url,'https://www.e900hardware.com/products/one-piece-garage-hardware-kit');
+ assert.ok(nodes.some(n=>[].concat(n['@type']).includes('Service')));
+});
