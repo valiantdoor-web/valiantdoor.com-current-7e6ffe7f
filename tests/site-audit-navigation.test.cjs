@@ -46,3 +46,18 @@ test('short search titles preserve full article headings and provide two languag
  assert.equal(new Set(Object.values(titles)).size,12);
  const $=load(p.renderArticle(values[0],[]));assert.equal($('[data-valiant-related-guides]').length,0);
 });
+test('the nine previously isolated static guides retain their content and gain two incoming links each',()=>{
+ const {execFileSync}=require('node:child_process');const root=path.resolve(__dirname,'..');
+ const slugs=['bent-garage-door-track-repair','broken-spring-repair-east-bay','garage-door-motor-hums-wont-move','garage-door-remote-keypad-issues','garage-door-tune-up-checklist-east-bay','garage-door-weather-seal-replacement','liftmaster-error-codes-guide','opener-flashing-light-troubleshooting','same-day-garage-door-repair-east-bay'];
+ const incoming=new Map(slugs.map(s=>[s,new Set()]));
+ for(const slug of slugs){
+  const file=`public/blog/${slug}/index.html`,html=fs.readFileSync(path.join(root,file),'utf8'),$=load(html);
+  const old=execFileSync('git',['show','86910b1:'+file],{cwd:root,encoding:'utf8'});
+  // Compare article content, not credentials regenerated during the normal build.
+  const before=load(old);assert.equal($('h1').text(),before('h1').text());
+  const section=$('[data-valiant-related-static-guides]');assert.equal(section.length,1);assert.equal(section.find('a').length,2);
+  section.find('a').each((i,a)=>{const target=$(a).attr('href').split('/').pop();assert.ok(incoming.has(target));assert.notEqual(target,slug);incoming.get(target).add(slug)});
+  section.remove();assert.equal($('main').text(),before('main').text());
+ }
+ for(const links of incoming.values())assert.equal(links.size,2);
+});
