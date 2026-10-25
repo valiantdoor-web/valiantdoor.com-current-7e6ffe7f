@@ -1,0 +1,14 @@
+.seo-completion{box-sizing:border-box;max-width:72rem;width:calc(100% - 2rem);margin:1.5rem auto;padding:clamp(1rem,3vw,1.5rem);border:1px solid #77613a;border-radius:.75rem;background:#151517;color:#f5f2eb;overflow-wrap:anywhere}
+.seo-completion h2{font-size:clamp(1.2rem,3vw,1.6rem);line-height:1.35;margin:0 0 1rem}
+.seo-completion p{line-height:1.65;margin:.75rem 0}
+.seo-completion a{color:#f4d99b;text-decoration:underline;text-underline-offset:.18em}
+.seo-completion a:focus-visible{outline:2px solid currentColor;outline-offset:4px}
+.seo-completion table{width:100%;border-collapse:collapse;table-layout:fixed;margin:1rem 0}
+.seo-completion caption{text-align:left;font-weight:600;margin-bottom:.75rem}
+.seo-completion th,.seo-completion td{text-align:left;border-bottom:1px solid #77613a;padding:.75rem .4rem;vertical-align:top}
+.seo-completion th:first-child{width:65%}
+.seo-completion blockquote{margin:1rem 0;padding-left:1rem;border-left:3px solid #d5b472;line-height:1.6}
+.seo-completion nav{display:flex;flex-wrap:wrap;gap:.75rem 1rem}
+.seo-completion nav a{display:inline-flex;align-items:center;min-height:44px}
+.seo-completion-h1{display:block;font-size:.62em;line-height:1.4;margin-top:.6em}
+#core-service-cities,#live-projects-map{scroll-margin-top:8rem}
