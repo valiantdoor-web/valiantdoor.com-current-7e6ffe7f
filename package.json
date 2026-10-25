@@ -18,7 +18,7 @@
     "search-console:dry-run": "node index-site.js --dry-run",
     "test:tracking": "node --test tests/marketing-tracking.test.cjs",
     "test:site-audit": "node --test tests/page-styles.test.cjs tests/faq-schema.test.cjs tests/google-measurement-csp.test.cjs tests/site-audit-navigation.test.cjs",
-    "test:seo-reference": "node --test tests/seo-reference.test.cjs",
+    "test:seo-reference": "node --test tests/seo-reference.test.cjs tests/review-snippets.test.cjs",
     "test:editorial-copy": "node --test tests/editorial-copy.test.cjs",
     "test:seo-completion": "node scripts/refresh-seo-completion.cjs && node --test tests/seo-completion.test.cjs"
   },
