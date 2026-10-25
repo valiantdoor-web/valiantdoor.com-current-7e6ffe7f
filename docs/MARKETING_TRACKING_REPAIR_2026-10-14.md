@@ -1,5 +1,7 @@
 # Marketing tracking repair - October 14, 2026
 
+> **Superseded measurement destination — October 25, 2026:** the newer approved SEO source of truth selects **Valiant Garage Door**, property `549338938`, stream `15411238744`, measurement ID `G-0X81XNNJM4`. The account/property mapping was verified through Windsor and the authenticated GA4 stream details. The website's single GA4 destination is being migrated to that stream; retain the historical isolation and conversion-safety work described below. Historical references to property `527178769` / `G-RVSWB9D2M5` are not the current destination. This note does not claim completed bookings or reconstruct past conversions.
+
 Website target: `valiantdoor-web/valiantdoor.com-current-7e6ffe7f`,
 Vercel `prj_JvCujZmnI32dWtCr210nKF2pPj1f`,
 team `team_O6ZRh3X80wVbdhhQp2hpYNGD`, `www.valiantdoor.com`.
