@@ -9,7 +9,7 @@ const root=path.resolve(__dirname,'..');
 const read=route=>fs.readFileSync(path.join(root,'public',route,'index.html'),'utf8');
 const walk=dir=>fs.readdirSync(dir,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(path.join(dir,e.name)):e.name.endsWith('.html')?[path.join(dir,e.name)]:[]);
 function originalText(html){const $=load(html);$('script,style,[data-valiant-seo-reference]').remove();return $('body').text().replace(/\s+/g,' ').trim();}
-test('SEO additions and metadata leave the owner\'s original visible body copy untouched',()=>{
+test('SEO additions preserve earlier copy except the explicit 2026-10-25 editorial rewrites',()=>{
   const routes=new Set([...areaSources,...Object.keys(titles),...guides.keys()]);
   for(const route of routes){
     const relative='public/'+(route?route+'/':'')+'index.html';
@@ -17,7 +17,12 @@ test('SEO additions and metadata leave the owner\'s original visible body copy u
     // Compare to the existing build pipeline's credential rendering, not a
     // stale checked-in copy of those generated details.
     const {addCredentialDetails}=require('../lib/blog-business-schema');
-    assert.equal(originalText(read(route)),originalText(addCredentialDetails(original)),route||'/');
+    const {manifest,mainDigest}=require('./helpers/editorial-copy.cjs');
+    if(manifest.pages[route]) {
+      assert.equal(mainDigest(read(route)),manifest.pages[route].mainDigest,route);
+      const stripMain=html=>{const $=load(html);$('main').remove();return originalText($.html());};
+      assert.equal(stripMain(read(route)),stripMain(addCredentialDetails(original)),route+' non-editorial body');
+    } else assert.equal(originalText(read(route)),originalText(addCredentialDetails(original)),route||'/');
   }
 });
 test('the exact approved search titles remain synchronized with social titles',()=>{
