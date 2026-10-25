@@ -7,6 +7,8 @@
   "url": "https://www.valiantdoor.com/",
   "telephone": "+19254094974",
   "email": "vm@valiantdoor.com",
+  "openingHours": "Mo-Su 00:00-23:59",
+  "openingHoursSpecification": [{"@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], "opens": "00:00", "closes": "23:59"}],
   "description": "Pleasanton-based garage door repair, spring replacement, opener service, maintenance, new door installation and commercial garage door service across the Tri-Valley and nearby East Bay communities.",
   "logo": "https://www.valiantdoor.com/assets/logo/valiant-logo-gold.png",
   "image": "https://www.valiantdoor.com/assets/home-optimized/shield-192.webp",

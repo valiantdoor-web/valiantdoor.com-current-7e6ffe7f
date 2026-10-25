@@ -3,7 +3,7 @@ const {load}=require('cheerio');
 const manifest=require('../../data/editorial-copy-20261025.json');
 const normalize=value=>value.replace(/\s+/g,' ').trim();
 const hash=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
-function mainDigest(html){const $=load(html);$('script,style,[data-valiant-credential-details],.valiant-process-reference,[data-valiant-related-projects],[data-valiant-related-guides],[data-valiant-related-static-guides],[data-valiant-seo-reference]').remove();return hash(normalize($('main').text()));}
+function mainDigest(html){const $=load(html);$('script,style,[data-valiant-credential-details],.valiant-process-reference,[data-valiant-related-projects],[data-valiant-related-guides],[data-valiant-related-static-guides],[data-valiant-seo-reference],[data-valiant-seo-completion]').remove();return hash(normalize($('main').text()));}
 function protectedContent(html){
  // Apply the existing credential compiler to both baseline and candidate; its
  // municipal-license link is generated, not an editorial navigation change.

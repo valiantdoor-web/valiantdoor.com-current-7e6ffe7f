@@ -8,7 +8,7 @@ const {refresh,cities,areaSources,titles,guides}=require('../scripts/refresh-seo
 const root=path.resolve(__dirname,'..');
 const read=route=>fs.readFileSync(path.join(root,'public',route,'index.html'),'utf8');
 const walk=dir=>fs.readdirSync(dir,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(path.join(dir,e.name)):e.name.endsWith('.html')?[path.join(dir,e.name)]:[]);
-function originalText(html){const $=load(html);$('script,style,[data-valiant-seo-reference]').remove();return $('body').text().replace(/\s+/g,' ').trim();}
+function originalText(html){const $=load(html);$('script,style,[data-valiant-seo-reference],[data-valiant-seo-completion]').remove();return $('body').text().replace(/\s+/g,' ').trim();}
 test('SEO additions preserve earlier copy except the explicit 2026-10-25 editorial rewrites',()=>{
   const routes=new Set([...areaSources,...Object.keys(titles),...guides.keys()]);
   for(const route of routes){

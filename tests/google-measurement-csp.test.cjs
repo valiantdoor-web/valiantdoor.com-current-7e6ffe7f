@@ -13,8 +13,13 @@ test('Google diagnostic endpoints are allowed only in connect-src', () => {
   assert.equal(h.value.split(origin).length - 1, 1);
  }
 });
-test('all other policy directives, headers, redirects and config remain unchanged', () => {
+test('all other policy directives and config remain unchanged except the explicit Vercel-host noindex rule', () => {
  const copy = structuredClone(config);
+ const preview = copy.headers.pop();
+ assert.deepEqual(preview, {
+  source: '/(.*)', has: [{type:'host', value:'.*\\.vercel\\.app'}],
+  headers: [{key:'X-Robots-Tag', value:'noindex, follow'}]
+ });
  const h = copy.headers.flatMap(rule => rule.headers).find(h => h.key === 'Content-Security-Policy');
  for (const origin of origins) h.value = h.value.replace(' '+origin, '');
  assert.deepEqual(copy, baseline);
