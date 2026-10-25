@@ -18,6 +18,7 @@ const settle=()=>new Promise(resolve=>setImmediate(resolve));
 (async()=>{
  let s=setup();s.w.eval(source('global-chrome'));s.w.document.getElementById('book').click();s.w.document.getElementById('phone').click();
  assert.equal(s.entries().filter(e=>e[0]==='config'&&e[1]==='G-0X81XNNJM4').length,1);
+ assert.equal(new URL(s.w.document.querySelector('script[src*="googletagmanager.com/gtag/js"]').src).searchParams.get('id'),'AW-17968443655');
  assert.equal(s.events().filter(e=>e[1]==='booking_click').length,1);
  assert.equal(s.events().filter(e=>e[1]==='phone_click').length,1);
  assert.equal(s.events().filter(e=>e[1]==='ads_conversion_Submit_lead_form_1').length,0);

@@ -12,6 +12,9 @@
   const BOOK_URL = "https://book.housecallpro.com/book/Valiant-Garage-Door/ae8e4a137c8c49b4b264073541533a7a?v2=true";
   const currentPath = window.location.pathname.replace(/\/+$/, "") || "/";
   const measurementId = "G-0X81XNNJM4";
+  // This existing Google tag serves the selected GA4 destination. The stream's
+  // direct gtag loader returns 404; the verified shared tag loader returns 200.
+  const googleTagId = "AW-17968443655";
   const productionHost = /^(?:www\.)?valiantdoor\.(?:com|io)$/.test(window.location.hostname);
 
   // Keep campaign provenance with a lead when it leaves its landing page.
@@ -115,7 +118,7 @@
       script.async = true;
       script.src =
         "https://www.googletagmanager.com/gtag/js?id=" +
-        encodeURIComponent(measurementId);
+        encodeURIComponent(googleTagId);
       script.dataset.valiantGa4 = measurementId;
       (document.head || document.documentElement).appendChild(script);
     }
