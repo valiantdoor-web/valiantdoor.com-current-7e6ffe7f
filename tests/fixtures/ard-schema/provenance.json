@@ -1,0 +1,11 @@
+{
+  "upstream": "https://github.com/ards-project/ard-spec",
+  "commit": "f073b1ea9b01a5f068d0b0986426f2ea49fa30b2",
+  "retrievedOn": "2026-11-04",
+  "license": "Apache-2.0",
+  "files": {
+    "ai-catalog.schema.json": "c55238483a4738e08b250bdd6af1f4dc05a91afe882c649d224d09c19cd8fe09",
+    "ard-entry.schema.json": "3032dad432607ddae0ec088db5759fa456f36308e0e9f340165aaed504d535f4",
+    "LICENSE": "dfe0e2a538e0e9004d43d1f57598177793109f5662706ccd1b1cb93c7fa34ce5"
+  }
+}

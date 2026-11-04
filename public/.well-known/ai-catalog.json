@@ -1,0 +1,29 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "Valiant Garage Door LLC",
+    "documentationUrl": "https://www.valiantdoor.com/openapi.json"
+  },
+  "entries": [
+    {
+      "identifier": "urn:air:www.valiantdoor.com:api:public-facts",
+      "displayName": "Valiant Garage Door public facts API",
+      "type": "application/vnd.oai.openapi+json",
+      "url": "https://www.valiantdoor.com/openapi.json",
+      "description": "Read-only public business facts, service-area information, emergency guidance, booking routes and policy URLs. This API does not submit service requests, book appointments, place calls, control garage doors or process payments.",
+      "capabilities": [
+        "getValiantAgentFacts"
+      ],
+      "tags": [
+        "garage-door",
+        "Pleasanton",
+        "public-business-facts",
+        "read-only"
+      ],
+      "representativeQueries": [
+        "What are Valiant Garage Door's contact details and service areas?",
+        "Where can I find Valiant Garage Door's emergency guidance and booking options?"
+      ]
+    }
+  ]
+}

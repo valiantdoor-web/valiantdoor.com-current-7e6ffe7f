@@ -2,7 +2,7 @@
  * Valiant Garage Door - WebMCP tools
  * Exposes client-side "tools" so browser-based AI agents can reliably
  * help visitors get business info, check the service area, request
- * service, book a free estimate, or call. Uses the standard
+ * service guidance, open the booking page, or hand off to a dialer. Uses the draft
  * document.modelContext API with feature detection and an idempotency
  * guard so it is safe to load on every page (and more than once).
  *
@@ -18,7 +18,7 @@
   // Feature detection: requires a secure context and modelContext support.
   if (!mc || typeof mc.registerTool !== "function") return;
 
-  window.__valiantWebMCP = true;
+  window.__valiantWebMCP = { registered: [], failed: [] };
 
   var BUSINESS = {
     name: "Valiant Garage Door",
@@ -30,9 +30,9 @@
     bookingUrl:
       "https://book.housecallpro.com/book/Valiant-garage-door/ae8e4a137c8c49b4b264073541533a7a?v2=true",
     quoteUrl: "https://www.valiantdoor.com/quote",
-    emergency: "24/7 after-hours emergency service, flat-rate $100 service call.",
-    warranty: "Lifetime warranty on installed parts and 10-year warranty on spring replacement, backed by the Valiant Standard of Excellence.",
-    rating: "5.0 stars (34 reviews)",
+    emergency: "Phone and staffed storefront available 24/7. Dispatch depends on technician, route, and parts availability. Appointments at 7:00 PM or later have a $100 service charge before approved parts, repairs, conversions, or upgrades.",
+    warranty: "See https://www.valiantdoor.com/warranty for applicable product, labor, and spring coverage and conditions.",
+    reviewsUrl: "https://www.valiantdoor.com/reviews-and-proof",
     serviceAreas: [
       "Pleasanton",
       "Dublin",
@@ -48,12 +48,47 @@
     return { content: [{ type: "text", text: str }] };
   }
 
-  function register(def, opts) {
+  // Chrome does not validate inputSchema at execution time. Reject invalid
+  // arguments before any navigation, dialog, network or contact side effect.
+  function validate(schema, args) {
+    if (!args || typeof args !== "object" || Array.isArray(args)) return "Input must be an object.";
+    var props = schema.properties || {};
+    if (Object.keys(args).some(function (key) { return !Object.prototype.hasOwnProperty.call(props, key); })) return "Unknown input property.";
+    if ((schema.required || []).some(function (key) { return !Object.prototype.hasOwnProperty.call(args, key); })) return "Missing required input.";
+    var invalid = Object.keys(args).some(function (key) {
+      var rule = props[key], value = args[key];
+      return typeof value !== rule.type ||
+        (rule.type === "string" && (!value.trim() || value.length > (rule.maxLength || 500))) ||
+        (rule.enum && rule.enum.indexOf(value) === -1);
+    });
+    return invalid ? "Invalid input value. Check the tool input schema." : "";
+  }
+
+  function register(def) {
+    var run = def.execute;
+    def.execute = function (args, options) {
+      var error = validate(def.inputSchema, args === undefined ? {} : args);
+      if (error) return { error: error };
+      if (options && options.signal && options.signal.aborted) return { error: "Operation cancelled." };
+      return run(args || {});
+    };
+    def.annotations = def.annotations || { readOnlyHint: true, consequentialHint: false };
+    function failed() { window.__valiantWebMCP.failed.push(def.name); }
     try {
-      var r = mc.registerTool(def, opts);
-      if (r && typeof r.catch === "function") r.catch(function () {});
+      var r = mc.registerTool(def);
+      if (r && typeof r.then === "function") {
+        r.then(function () { window.__valiantWebMCP.registered.push(def.name); }, failed);
+      } else window.__valiantWebMCP.registered.push(def.name);
+    } catch (e) { failed(); }
+  }
+
+  function confirmed(message) {
+    // Hints are metadata, not approval enforcement. Require a real in-page
+    // user confirmation as well; fail closed if dialogs are unavailable.
+    try {
+      return typeof window.confirm === "function" && window.confirm(message) === true;
     } catch (e) {
-      /* no-op: never break the page for an agent feature */
+      return false;
     }
   }
 
@@ -61,7 +96,7 @@
   register({
     name: "get_valiant_business_info",
     description:
-      "Get Valiant Garage Door's contact details, address, hours, service area, ratings, and warranty. Use this to answer questions about the business.",
+      "Get Valiant Garage Door's contact details, address, hours, service area, review-source link, and warranty policy. Use this to answer questions about the business.",
     inputSchema: { type: "object", properties: {}, additionalProperties: false },
     execute: function () {
       return text(
@@ -70,7 +105,7 @@
           "Phone: " + BUSINESS.phoneDisplay + " (" + BUSINESS.phone + ")",
           "Email: " + BUSINESS.email,
           "Address: " + BUSINESS.address,
-          "Rating: " + BUSINESS.rating,
+          "Reviews and proof: " + BUSINESS.reviewsUrl,
           "Service area: " + BUSINESS.serviceAreas.join(", ") + " and nearby East Bay communities.",
           "Emergency: " + BUSINESS.emergency,
           "Warranty: " + BUSINESS.warranty,
@@ -84,12 +119,12 @@
   register({
     name: "check_valiant_service_area",
     description:
-      "Check whether Valiant Garage Door serves a given city or town in the East Bay. Returns whether it is an immediate service area.",
+      "Check whether a city is in Valiant Garage Door's core service area. This does not confirm technician availability or book a visit.",
     inputSchema: {
       type: "object",
       properties: {
         city: {
-          type: "string",
+          type: "string", minLength: 1, maxLength: 100,
           description: "The city or town to check, e.g. 'Dublin' or 'Fremont'."
         }
       },
@@ -105,7 +140,7 @@
       if (match) {
         return text(
           match +
-            " is an immediate service area for Valiant Garage Door. Book online at " +
+            " is a core service area for Valiant Garage Door. Dispatch remains subject to technician, route, and parts availability. Book online at " +
             BUSINESS.bookingUrl +
             " or call " +
             BUSINESS.phoneDisplay +
@@ -123,93 +158,65 @@
     }
   });
 
-  // 3) Book a free estimate ---------------------------------------------
+  // 3) Open the provider booking page; never create a booking here.
   register({
     name: "book_valiant_estimate",
-    description:
-      "Open Valiant Garage Door's free-estimate instant online booking so the user can schedule a visit.",
+    description: "Open the official booking page after user confirmation. No appointment is created by this tool; the user must complete the provider booking flow.",
     inputSchema: { type: "object", properties: {}, additionalProperties: false },
+    annotations: { readOnlyHint: false, consequentialHint: true },
     execute: function () {
+      if (!confirmed("Open Valiant Garage Door's official booking page? No appointment will be booked until you complete and confirm the booking there.")) {
+        return { status: "cancelled", bookingUrl: BUSINESS.bookingUrl, booked: false };
+      }
+      var opened = false;
       try {
-        window.open(BUSINESS.bookingUrl, "_blank", "noopener");
+        var tab = window.open("about:blank", "_blank");
+        if (tab) { tab.opener = null; tab.location.href = BUSINESS.bookingUrl; opened = true; }
       } catch (e) {}
-      return text(
-        "Opening Valiant Garage Door's free-estimate booking page: " + BUSINESS.bookingUrl
-      );
+      return { status: opened ? "booking_page_opened" : "open_not_confirmed", bookingUrl: BUSINESS.bookingUrl, booked: false };
     }
   });
 
-  // 4) Call the business -------------------------------------------------
+  // 4) A telephone handoff is consequential; never claim call connection.
   register({
     name: "call_valiant",
-    description:
-      "Start a phone call to Valiant Garage Door for immediate or emergency garage door help.",
+    description: "Hand off to the phone dialer after explicit user confirmation. This tool cannot confirm that a call connected or that a technician is available.",
     inputSchema: { type: "object", properties: {}, additionalProperties: false },
+    annotations: { readOnlyHint: false, consequentialHint: true },
     execute: function () {
+      if (!confirmed("Open your phone dialer for Valiant Garage Door at " + BUSINESS.phoneDisplay + "?")) return { status: "cancelled", phone: BUSINESS.phoneDisplay, connected: false };
       try {
         window.location.href = "tel:" + BUSINESS.phone;
-      } catch (e) {}
-      return text("Calling Valiant Garage Door at " + BUSINESS.phoneDisplay + ".");
+        return { status: "dialer_handoff_requested", phone: BUSINESS.phoneDisplay, connected: false };
+      } catch (e) {
+        return { status: "handoff_failed", phone: BUSINESS.phoneDisplay, connected: false };
+      }
     }
   });
 
-  // 5) Request service (primary, form-like tool) ------------------------
+  // 5) Route guidance only. No lead, customer, message, call, or booking is created.
   register({
     name: "request_valiant_service",
-    description:
-      "Request garage door service from Valiant Garage Door. Collects the problem, city, and urgency, then routes the user to the fastest path (emergency call or online booking).",
+    description: "Prepare service contact guidance for the user to review. This does not send a request, call the business, or book an appointment.",
     inputSchema: {
       type: "object",
       properties: {
-        issue: {
-          type: "string",
-          description:
-            "What's wrong or the service needed, e.g. 'broken spring', 'opener not working', 'new door install'."
-        },
-        city: {
-          type: "string",
-          description: "The city where service is needed."
-        },
-        urgency: {
-          type: "string",
-          enum: ["emergency", "same_day", "flexible"],
-          description: "How urgent the request is.",
-          default: "flexible"
-        }
+        issue: { type: "string", minLength: 1, maxLength: 500, description: "The garage door problem or service needed." },
+        city: { type: "string", minLength: 1, maxLength: 100, description: "City where service is needed." },
+        urgency: { type: "string", enum: ["emergency", "same_day", "flexible"], default: "flexible", description: "How soon service is requested." }
       },
       required: ["issue"],
       additionalProperties: false
     },
     execute: function (args) {
-      args = args || {};
-      var issue = String(args.issue || "").trim() || "garage door service";
-      var urgency = String(args.urgency || "flexible");
-      var city = String(args.city || "").trim();
-      var lines = ["Request noted: " + issue + (city ? " in " + city : "") + "."];
-      if (urgency === "emergency") {
-        try {
-          window.location.href = "tel:" + BUSINESS.phone;
-        } catch (e) {}
-        lines.push(
-          "For emergencies, calling " +
-            BUSINESS.phoneDisplay +
-            " now is fastest (" +
-            BUSINESS.emergency +
-            ")."
-        );
-      } else {
-        try {
-          window.open(BUSINESS.bookingUrl, "_blank", "noopener");
-        } catch (e) {}
-        lines.push(
-          "Opening free-estimate booking: " +
-            BUSINESS.bookingUrl +
-            " — or call " +
-            BUSINESS.phoneDisplay +
-            "."
-        );
-      }
-      return text(lines.join(" "));
+      return {
+        status: "guidance_only", submitted: false, booked: false,
+        issue: args.issue.trim(), city: args.city ? args.city.trim() : null,
+        urgency: args.urgency || "flexible",
+        nextStep: args.urgency === "emergency" ? "User may call to request urgent service; dispatch is not guaranteed." : "User may open the booking page and review available appointments.",
+        phone: BUSINESS.phoneDisplay, bookingUrl: BUSINESS.bookingUrl,
+        availability: BUSINESS.emergency
+      };
     }
   });
 })();

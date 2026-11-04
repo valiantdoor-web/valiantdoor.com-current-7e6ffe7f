@@ -11,7 +11,7 @@ const walk = (dir) => fs.readdirSync(dir, { withFileTypes: true }).flatMap((entr
 let changed = 0;
 for (const file of [...walk(path.join(root, 'public')), path.join(root, 'lib/blog-index.html')]) {
   const before = fs.readFileSync(file, 'utf8');
-  const after = before.replace(/\/js\/(?:global-chrome|lead-capture|estimate-upload|main)(?:\.min)?\.js(?:\?[^"'\s<>]*)?/g,
+  const after = before.replace(/\/js\/(?:global-chrome|lead-capture|estimate-upload|main|webmcp)(?:\.min)?\.js(?:\?[^"'\s<>]*)?/g,
     (url) => versions[url.split('?')[0]] || url);
   if (before !== after) { fs.writeFileSync(file, after); changed++; }
 }
