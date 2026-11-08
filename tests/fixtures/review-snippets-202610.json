@@ -1,0 +1,103 @@
+{
+  "baselineCommit": "761e2377094a672ae5693b0c5d2f3a017011911f",
+  "approvedReviewCommit": "2d2ed09a1dcfb8ed20873ee92f261c9cf4f8d376",
+  "version": "2026-10",
+  "yelpUrl": "https://www.yelp.com/biz/valiant-garage-door-pleasanton",
+  "proofPath": "/reviews-and-proof",
+  "sections": {
+    "/emergency-after-hours": {
+      "sourceSha256": "cb2200c60393b88d899c6c49820c92f0e67baf59a6547819c90b4114447b8158",
+      "reviews": [
+        {
+          "excerpt": "“Valentino and Mike came in at 10:45pm and finished the repair in under an hour.”",
+          "reviewer": "Narasimha V.",
+          "date": "2026-04-30",
+          "displayDate": "April 30, 2026"
+        }
+      ]
+    },
+    "/garage-door-before-after": {
+      "sourceSha256": "94c3e65a350226ad16862c9bd2b57a7c09c36cbc8521982ac1adc9b6145d3244",
+      "reviews": [
+        {
+          "excerpt": "“The door looks as good as new, operates smoothly, and is even quieter than before. You would never know anything had happened.”",
+          "reviewer": "Sandeep R.",
+          "date": "2026-05-12",
+          "displayDate": "May 12, 2026"
+        }
+      ]
+    },
+    "/garage-door-openers": {
+      "sourceSha256": "f50b7e190b7eebb3abf4745dbdda8725eb818c5a772dcc5e4163ec18a2a8f155",
+      "reviews": [
+        {
+          "excerpt": "“He helped me picked the garage opener that is mounted on the side of the garage door instead of in the middle of the ceiling.”",
+          "reviewer": "Jordy B.",
+          "date": "2026-03-10",
+          "displayDate": "March 10, 2026"
+        }
+      ]
+    },
+    "/garage-door-repair-pleasanton": {
+      "sourceSha256": "4b1e5767c5418223222048d7bf9f1b62819c762af5a167e86e4ca3ce7e626d95",
+      "reviews": [
+        {
+          "excerpt": "“I had such a good initial customer service experience with Valentino that I sought him out almost 4 years later after moving to a new place and needing a garage door repair once again.”",
+          "reviewer": "Sebastian N.",
+          "date": "2026-03-12",
+          "displayDate": "March 12, 2026"
+        }
+      ]
+    },
+    "/garage-door-repair": {
+      "sourceSha256": "1ce72125089c771b0ef1fa5423dc2124f3f917148d3a54d0b40b2d97978de245",
+      "reviews": [
+        {
+          "excerpt": "“The technician was friendly, knowledgeable, and took the time to make sure I understood what needed to be fixed without trying to upsell anything.”",
+          "reviewer": "Sharmila D.",
+          "date": "2026-07-04",
+          "displayDate": "July 4, 2026"
+        }
+      ]
+    },
+    "/garage-door-spring-replacement": {
+      "sourceSha256": "db82bca39117adbb4717f05c20331cf13314b9e5f0f0ac54def26d25f7af3451",
+      "reviews": [
+        {
+          "excerpt": "“After completing the repair, they did a full walkthrough and inspection of the entire system to make sure everything was in top shape.”",
+          "reviewer": "Courtney S.",
+          "date": "2026-05-24",
+          "displayDate": "May 24, 2026"
+        },
+        {
+          "excerpt": "“I had a broken spring and a new opener that I wanted installed. He was there within an hour of making the call. His pricing was very fair and you can tell by the quality of his work that he’s been doing it for a long time.”",
+          "reviewer": "Glenn M.",
+          "date": "2026-03-12",
+          "displayDate": "March 12, 2026"
+        }
+      ]
+    },
+    "/new-garage-door-installation": {
+      "sourceSha256": "5f2e9dba33df78cc9295304387bee647412e1f087c8e59f7140efa62dc05fbc2",
+      "reviews": [
+        {
+          "excerpt": "“When all said and done, phenomenal price, superior craftsmanship and competence. Valentino, the owner/master installer cares about the customer experience.”",
+          "reviewer": "J Y.",
+          "date": "2026-07-22",
+          "displayDate": "July 22, 2026"
+        }
+      ]
+    },
+    "/safety-sensors": {
+      "sourceSha256": "bcf1b2156958d2331127a217867341f0a74b70aac9de48c11789133de6445f49",
+      "reviews": [
+        {
+          "excerpt": "“The sensor issue was properly diagnosed and resolved, the torque was adjusted to make the system sturdy, and everything was thoroughly greased.”",
+          "reviewer": "Nandakumar A.",
+          "date": "2026-04-25",
+          "displayDate": "April 25, 2026"
+        }
+      ]
+    }
+  }
+}
