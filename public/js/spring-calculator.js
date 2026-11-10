@@ -1,22 +1,31 @@
 (function () {
   'use strict';
-  const PRICES = Object.freeze({ torsion: { 1: 159, 2: 189 }, highlift: { 1: 459, 2: 459 }, torquemaster: { 1: 549, 2: 649 }, afterHours: 100 });
+  const INSTALLATION = Object.freeze({ 1: 159, 2: 189 });
+  const WIRE_SIZES = Object.freeze(['.207', '.218', '.225', '.234', '.243', '.250', '.262', '.273', '.283', '.295', '.306', '.319', '.331', '.343', '.362', '.375']);
+  const SPRINGS = Object.freeze({
+    endurance: { name: 'Valiant Endurance', base: 99, warranty: 5, finish: 'standard', baseSpec: '.207 × 22.5 / 2"' },
+    pro: { name: 'Valiant Endurance Pro', base: 129, warranty: 5, finish: 'duramaster', baseSpec: '.207 × 26 / 1.75B' },
+    max: { name: 'Valiant Endurance Max', base: 149, warranty: 10, finish: 'endurance', baseSpec: '.207 × 31 / 1.75"' }
+  });
   const URGENCY = ['Scheduled daytime', 'Priority daytime request', 'After hours · 7 PM or later'];
-  const FINISH = { standard: 'Standard torsion springs', duramaster: 'DuraMaster powder-coated', endurance: 'Endurance Max premium' };
   function calculateSpringEstimate(input) {
-    const system = ['torsion', 'highlift', 'torquemaster'].includes(input.system) ? input.system : 'torsion';
+    const tier = Object.hasOwn(SPRINGS, input.tier) ? input.tier : 'endurance';
+    const spring = SPRINGS[tier];
     const count = Number(input.count) === 1 ? 1 : 2;
     const urgency = [0, 1, 2].includes(Number(input.urgency)) ? Number(input.urgency) : 0;
-    const installation = PRICES[system][count];
-    const afterHours = urgency === 2 ? PRICES.afterHours : 0;
-    return { installation, afterHours, startingAmount: installation + afterHours, upgradeQuoted: input.finish !== 'standard', system, count, urgency };
+    const sizeStep = Math.max(0, WIRE_SIZES.indexOf(input.size));
+    const unitPrice = spring.base + sizeStep * 10;
+    const parts = unitPrice * count;
+    const installation = INSTALLATION[count];
+    const afterHours = urgency === 2 ? 99 : 0;
+    return { tier, name: spring.name, warranty: spring.warranty, baseSpec: spring.baseSpec, size: WIRE_SIZES[sizeStep], sizeStep, unitPrice, parts, installation, afterHours, total: parts + installation + afterHours, count, urgency };
   }
-  if (typeof module !== 'undefined' && module.exports) module.exports = { calculateSpringEstimate };
+  if (typeof module !== 'undefined' && module.exports) module.exports = { calculateSpringEstimate, WIRE_SIZES };
   if (typeof document === 'undefined') return;
   const root = document.querySelector('[data-spring-calculator]');
   if (!root) return;
   const $ = s => root.querySelector(s);
-  const money = n => '$' + n.toLocaleString('en-US');
+  const money = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
   function coil(x, y, length, finish, mirrored) {
     const turns = Math.floor(length / 3.6);
     const wire = Array.from({ length: turns }, (_, i) => '<ellipse cx="' + (x + 4 + i * (length - 8) / (turns - 1)).toFixed(1) + '" cy="' + y + '" rx="3.6" ry="15.5" fill="none" stroke="url(#sc-coil-' + finish + ')" stroke-width="2.6"/>').join('');
@@ -27,6 +36,7 @@
   }
   function diagram(state) {
     const doubleDoor = state.door === 'double';
+    const finish = SPRINGS[state.tier].finish;
     const width = doubleDoor ? 610 : 380, left = (900 - width) / 2, right = left + width;
     const panelColumns = doubleDoor ? 4 : 2, panelWidth = (width - 30) / panelColumns;
     let panels = '', hinges = '';
@@ -44,8 +54,8 @@
     }
     const shaftY = 112, mid = 450, coilLength = doubleDoor ? 181 : 104;
     const springs = state.count === 2
-      ? coil(mid - coilLength - 18, shaftY, coilLength, state.finish, true) + coil(mid + 18, shaftY, coilLength, state.finish, false)
-      : coil(mid - coilLength * 1.18 - 18, shaftY, coilLength * 1.18, state.finish, true);
+      ? coil(mid - coilLength - 18, shaftY, coilLength, finish, true) + coil(mid + 18, shaftY, coilLength, finish, false)
+      : coil(mid - coilLength * 1.18 - 18, shaftY, coilLength * 1.18, finish, true);
     const drum = x => '<g><path d="M' + (x - 16) + ' 93h32v38h-32z" fill="url(#sc-metal)" stroke="#4c5355"/>' + [0, 1, 2, 3, 4].map(i => '<ellipse cx="' + (x - 12 + i * 6) + '" cy="112" rx="4" ry="21" fill="none" stroke="' + (i % 2 ? '#9b9e9b' : '#424b4f') + '" stroke-width="2.4"/>').join('') + '<rect x="' + (x - 5) + '" y="107" width="10" height="10" rx="2" fill="#656e70"/></g>';
     return '<svg viewBox="0 0 900 475" role="img" aria-label="Realistic inside view of a ' + (doubleDoor ? 'double' : 'single') + ' sectional garage door with ' + state.count + ' torsion spring' + (state.count === 2 ? 's' : '') + ', cable drums, lift cables, hinges and steel tracks"><defs>' +
       '<linearGradient id="sc-wall" x2="0" y2="1"><stop stop-color="#353638"/><stop offset=".65" stop-color="#232527"/><stop offset="1" stop-color="#1a1c1d"/></linearGradient>' +
@@ -72,25 +82,28 @@
       '</g><path d="M450 65v16" stroke="#c4b18a" stroke-opacity=".55"/><text x="450" y="59" fill="#c5c0b2" font-family="system-ui,sans-serif" font-size="9" letter-spacing="1.5" text-anchor="middle">TORSION SPRING ASSEMBLY</text></svg>';
   }
   function read() {
-    return { door: $('[name="sc-door"]:checked').value, count: Number($('#sc-count').value), finish: $('#sc-finish').value, system: $('#sc-system').value, urgency: Number($('#sc-urgency').value) };
+    return { door: $('[name="sc-door"]:checked').value, count: Number($('#sc-count').value), tier: $('#sc-finish').value, size: $('#sc-size').value, urgency: Number($('#sc-urgency').value) };
   }
   function render() {
     const state = read(), quote = calculateSpringEstimate(state);
     $('[data-sc-scene]').innerHTML = diagram(state);
-    $('[data-sc-finish]').textContent = FINISH[state.finish];
+    $('[data-sc-finish]').textContent = quote.name + ' · ' + quote.warranty + '-year warranty';
     $('[data-sc-door]').textContent = (state.door === 'double' ? 'Double door' : 'Single door') + ' · ' + state.count + '-spring configuration';
-    $('[data-sc-installation]').textContent = money(quote.installation) + '+';
+    $('[data-sc-installation]').textContent = money(quote.installation);
     $('[data-sc-afterhours]').textContent = money(quote.afterHours);
-    $('[data-sc-total]').textContent = money(quote.startingAmount) + '+';
-    $('[data-sc-hardware]').textContent = quote.upgradeQuoted ? 'Upgrade quoted separately' : 'Confirmed after inspection';
+    $('[data-sc-total]').textContent = money(quote.total);
+    $('[data-sc-hardware]').textContent = money(quote.parts);
+    $('[data-sc-unit-price]').textContent = money(quote.unitPrice) + ' × ' + quote.count + (quote.count === 1 ? ' spring' : ' springs');
+    $('[data-sc-warranty]').textContent = quote.warranty + '-year warranty';
+    $('[data-sc-spec]').textContent = 'Base reference: ' + quote.baseSpec + '. Length and inside diameter are confirmed by your technician.';
+    $('[data-sc-size-price]').textContent = 'Each size step above .207 adds $10 per spring. Selected size adjustment: ' + money(quote.sizeStep * 10) + ' per spring.';
     $('[data-sc-urgency]').textContent = URGENCY[state.urgency];
     $('[data-sc-dispatch]').textContent = URGENCY[state.urgency];
     $('[data-sc-dispatch]').dataset.urgency = state.urgency;
     $('#sc-urgency').style.setProperty('--sc-fill', (state.urgency * 50) + '%');
     $('#sc-urgency').setAttribute('aria-valuetext', URGENCY[state.urgency]);
-    $('[data-sc-upgrade]').hidden = !quote.upgradeQuoted;
     $('[data-sc-availability]').textContent = state.urgency === 2 ? 'After-hours charge applies to appointments at 7 PM or later. Call to confirm availability.' : state.urgency === 1 ? 'Priority is a request, not a guaranteed arrival time. Call to confirm the next available route.' : 'Scheduling is confirmed based on technician, route and parts availability.';
-    const selection = (state.door === 'double' ? 'Double door' : 'Single door') + ', ' + state.count + ' spring(s), ' + FINISH[state.finish] + ', ' + $('#sc-system').selectedOptions[0].text + ', ' + URGENCY[state.urgency] + '.';
+    const selection = (state.door === 'double' ? 'Double door' : 'Single door') + ', ' + state.count + ' spring(s), ' + quote.name + ', ' + quote.size + ' wire, ' + quote.warranty + '-year warranty, ' + URGENCY[state.urgency] + '. Estimated installed total before tax: ' + money(quote.total) + '.';
     $('[data-sc-text]').href = 'sms:+19254094974?body=' + encodeURIComponent('Hi Valiant, I would like a spring replacement quote. ' + selection + ' I can attach a photo of the existing spring system.');
   }
   root.addEventListener('change', event => {
