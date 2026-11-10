@@ -1,6 +1,6 @@
 (function () {
   'use strict';
-  const INSTALLATION = Object.freeze({ 1: 159, 2: 189 });
+  const INSTALLATION = Object.freeze({ 1: 159, 2: 189, 4: 250 });
   const WIRE_SIZES = Object.freeze(['.207', '.218', '.225', '.234', '.243', '.250', '.262', '.273', '.283', '.295', '.306', '.319', '.331', '.343', '.362', '.375']);
   const SPRINGS = Object.freeze({
     endurance: { name: 'Valiant Endurance', base: 99, warranty: 5, finish: 'standard', baseSpec: '.207 × 22.5 / 2"' },
@@ -8,19 +8,32 @@
     max: { name: 'Valiant Endurance Max', base: 149, warranty: 10, finish: 'endurance', baseSpec: '.207 × 31 / 1.75"' }
   });
   const URGENCY = ['Scheduled daytime', 'Priority daytime request', 'After hours · 7 PM or later'];
+  const DOORS = Object.freeze({
+    steel25: { category: 'noninsulated', name: '25-gauge steel', size: '.207' },
+    steel24: { category: 'noninsulated', name: '24-gauge steel', size: '.218' },
+    insulated138: { category: 'insulated', name: '1 3/8-inch insulated', size: '.225' },
+    insulated2: { category: 'insulated', name: '2-inch insulated', size: '.234' },
+    wood: { category: 'wood', name: 'Wood door', size: '.250' },
+    backedwood: { category: 'wood', name: 'Wood door with backing', size: '.262' },
+    carriage234: { category: 'carriage', name: 'Carriage · four .234 springs', size: '.234', count: 4 },
+    carriage250: { category: 'carriage', name: 'Carriage · four .250 springs', size: '.250', count: 4 },
+    fullview: { category: 'fullview', name: 'Full-view · four .218 springs', size: '.218', count: 4 }
+  });
   function calculateSpringEstimate(input) {
     const tier = Object.hasOwn(SPRINGS, input.tier) ? input.tier : 'endurance';
     const spring = SPRINGS[tier];
-    const count = Number(input.count) === 1 ? 1 : 2;
+    const profile = Object.hasOwn(DOORS, input.profile) ? input.profile : 'steel25';
+    const door = DOORS[profile];
+    const count = door.count || ([1, 2, 4].includes(Number(input.count)) ? Number(input.count) : input.door === 'single' ? 1 : 2);
     const urgency = [0, 1, 2].includes(Number(input.urgency)) ? Number(input.urgency) : 0;
-    const sizeStep = Math.max(0, WIRE_SIZES.indexOf(input.size));
+    const sizeStep = WIRE_SIZES.indexOf(door.size);
     const unitPrice = spring.base + sizeStep * 10;
     const parts = unitPrice * count;
     const installation = INSTALLATION[count];
     const afterHours = urgency === 2 ? 99 : 0;
-    return { tier, name: spring.name, warranty: spring.warranty, baseSpec: spring.baseSpec, size: WIRE_SIZES[sizeStep], sizeStep, unitPrice, parts, installation, afterHours, total: parts + installation + afterHours, count, urgency };
+    return { tier, profile, construction: door.name, category: door.category, name: spring.name, warranty: spring.warranty, baseSpec: spring.baseSpec, size: door.size, sizeStep, unitPrice, parts, installation, afterHours, total: parts + installation + afterHours, count, urgency };
   }
-  if (typeof module !== 'undefined' && module.exports) module.exports = { calculateSpringEstimate, WIRE_SIZES };
+  if (typeof module !== 'undefined' && module.exports) module.exports = { calculateSpringEstimate, WIRE_SIZES, DOORS };
   if (typeof document === 'undefined') return;
   const root = document.querySelector('[data-spring-calculator]');
   if (!root) return;
@@ -31,12 +44,15 @@
     const wire = Array.from({ length: turns }, (_, i) => '<ellipse cx="' + (x + 4 + i * (length - 8) / (turns - 1)).toFixed(1) + '" cy="' + y + '" rx="3.6" ry="15.5" fill="none" stroke="url(#sc-coil-' + finish + ')" stroke-width="2.6"/>').join('');
     const fixed = mirrored ? x + length : x;
     const winding = mirrored ? x : x + length;
-    return '<g><rect x="' + x + '" y="' + (y - 13) + '" width="' + length + '" height="26" rx="10" fill="#0d0f10"/>' + wire +
+    return '<g class="sc-spring"><rect x="' + x + '" y="' + (y - 13) + '" width="' + length + '" height="26" rx="10" fill="#0d0f10"/>' + wire +
       '<path d="M' + (fixed - 7) + ' ' + (y - 11) + 'h14v22h-14z" fill="url(#sc-metal)"/><rect x="' + (winding - 10) + '" y="' + (y - 11) + '" width="20" height="22" rx="3" fill="url(#sc-metal)"/><ellipse cx="' + winding + '" cy="' + y + '" rx="5.5" ry="13" fill="#33383b" stroke="#8d9292"/><circle cx="' + winding + '" cy="' + (y - 7) + '" r="2" fill="' + (mirrored ? '#903a30' : '#313336') + '"/><circle cx="' + winding + '" cy="' + (y + 7) + '" r="2" fill="#121516"/></g>';
   }
   function diagram(state) {
     const doubleDoor = state.door === 'double';
     const finish = SPRINGS[state.tier].finish;
+    const profile = DOORS[state.profile];
+    const woodDoor = ['wood', 'carriage'].includes(profile.category);
+    const glassDoor = profile.category === 'fullview';
     const width = doubleDoor ? 610 : 380, left = (900 - width) / 2, right = left + width;
     const panelColumns = doubleDoor ? 4 : 2, panelWidth = (width - 30) / panelColumns;
     let panels = '', hinges = '';
@@ -45,7 +61,9 @@
       panels += '<path d="M' + left + ' ' + (y + 56) + 'h' + width + '" stroke="#44494b" stroke-width="2"/><path d="M' + left + ' ' + (y + 58) + 'h' + width + '" stroke="#bfc0b5" stroke-opacity=".32"/>';
       for (let col = 0; col < panelColumns; col++) {
         const x = left + 15 + col * panelWidth;
-        panels += '<rect x="' + (x + 8) + '" y="' + (y + 8) + '" width="' + (panelWidth - 16) + '" height="40" rx="3" fill="url(#sc-inset)" stroke="#93978e" stroke-opacity=".5"/><path d="M' + (x + 14) + ' ' + (y + 43) + 'v-28h' + (panelWidth - 28) + '" fill="none" stroke="#eeeeDF" stroke-opacity=".28"/>';
+        panels += '<rect x="' + (x + 8) + '" y="' + (y + 8) + '" width="' + (panelWidth - 16) + '" height="40" rx="3" fill="' + (glassDoor ? 'url(#sc-glass)' : 'url(#sc-inset)') + '" stroke="' + (glassDoor ? '#c4d0d3' : '#93978e') + '" stroke-opacity=".5"/><path d="M' + (x + 14) + ' ' + (y + 43) + 'v-28h' + (panelWidth - 28) + '" fill="none" stroke="#eeeeDF" stroke-opacity=".28"/>';
+        if (woodDoor) panels += '<path d="M' + (x + 14) + ' ' + (y + 22) + 'q' + (panelWidth / 3) + ' -4 ' + (panelWidth - 29) + ' 2m-' + (panelWidth - 29) + ' 10q' + (panelWidth / 3) + ' 4 ' + (panelWidth - 29) + ' -1" stroke="#4c301c" stroke-opacity=".3" fill="none"/>';
+        if (glassDoor) panels += '<path d="m' + (x + 12) + ' ' + (y + 12) + ' ' + (panelWidth - 30) + ' 31m-25-32 25 18" stroke="#d0e2e7" stroke-opacity=".2" stroke-width="3"/>';
       }
       if (row < 3) for (let h = 0; h <= panelColumns; h++) {
         const x = left + (h === 0 ? 8 : h === panelColumns ? width - 8 : width * h / panelColumns);
@@ -53,14 +71,18 @@
       }
     }
     const shaftY = 112, mid = 450, coilLength = doubleDoor ? 181 : 104;
-    const springs = state.count === 2
-      ? coil(mid - coilLength - 18, shaftY, coilLength, finish, true) + coil(mid + 18, shaftY, coilLength, finish, false)
-      : coil(mid - coilLength * 1.18 - 18, shaftY, coilLength * 1.18, finish, true);
+    const shortCoil = doubleDoor ? 92 : 51;
+    const springs = state.count === 4
+      ? [-2, -1, 0, 1].map((n, i) => coil(mid + (n < 0 ? n * (shortCoil + 16) - 12 : n * (shortCoil + 16) + 20), shaftY, shortCoil, finish, i < 2)).join('')
+      : state.count === 2
+        ? coil(mid - coilLength - 18, shaftY, coilLength, finish, true) + coil(mid + 18, shaftY, coilLength, finish, false)
+        : coil(mid - coilLength * 1.18 - 18, shaftY, coilLength * 1.18, finish, true);
     const drum = x => '<g><path d="M' + (x - 16) + ' 93h32v38h-32z" fill="url(#sc-metal)" stroke="#4c5355"/>' + [0, 1, 2, 3, 4].map(i => '<ellipse cx="' + (x - 12 + i * 6) + '" cy="112" rx="4" ry="21" fill="none" stroke="' + (i % 2 ? '#9b9e9b' : '#424b4f') + '" stroke-width="2.4"/>').join('') + '<rect x="' + (x - 5) + '" y="107" width="10" height="10" rx="2" fill="#656e70"/></g>';
-    return '<svg viewBox="0 0 900 475" role="img" aria-label="Realistic inside view of a ' + (doubleDoor ? 'double' : 'single') + ' sectional garage door with ' + state.count + ' torsion spring' + (state.count === 2 ? 's' : '') + ', cable drums, lift cables, hinges and steel tracks"><defs>' +
+    return '<svg viewBox="0 0 900 475" role="img" aria-label="Illustration of a ' + (doubleDoor ? 'double-car' : 'single-car') + ' ' + profile.name + ' garage door with ' + state.count + ' torsion spring' + (state.count === 1 ? '' : 's') + ', cable drums, lift cables, hinges and steel tracks"><defs>' +
       '<linearGradient id="sc-wall" x2="0" y2="1"><stop stop-color="#353638"/><stop offset=".65" stop-color="#232527"/><stop offset="1" stop-color="#1a1c1d"/></linearGradient>' +
-      '<linearGradient id="sc-door" x2=".1" y2="1"><stop stop-color="#acb0a7"/><stop offset=".4" stop-color="#858d85"/><stop offset="1" stop-color="#6b746e"/></linearGradient>' +
-      '<linearGradient id="sc-inset" x2="0" y2="1"><stop stop-color="#747e77"/><stop offset=".1" stop-color="#9ea59b"/><stop offset=".8" stop-color="#929a90"/><stop offset="1" stop-color="#686f69"/></linearGradient>' +
+      '<linearGradient id="sc-door" x2=".1" y2="1"><stop stop-color="' + (woodDoor ? '#ac855a' : glassDoor ? '#9eabad' : '#acb0a7') + '"/><stop offset=".4" stop-color="' + (woodDoor ? '#8b6541' : glassDoor ? '#6b7d82' : '#858d85') + '"/><stop offset="1" stop-color="' + (woodDoor ? '#5e412a' : '#6b746e') + '"/></linearGradient>' +
+      '<linearGradient id="sc-inset" x2="0" y2="1"><stop stop-color="' + (woodDoor ? '#795235' : '#747e77') + '"/><stop offset=".1" stop-color="' + (woodDoor ? '#b08857' : '#9ea59b') + '"/><stop offset=".8" stop-color="' + (woodDoor ? '#987146' : '#929a90') + '"/><stop offset="1" stop-color="' + (woodDoor ? '#69472b' : '#686f69') + '"/></linearGradient>' +
+      '<linearGradient id="sc-glass" x2=".8" y2="1"><stop stop-color="#799299"/><stop offset=".4" stop-color="#3b5862"/><stop offset="1" stop-color="#263c44"/></linearGradient>' +
       '<linearGradient id="sc-metal" x2="0" y2="1"><stop stop-color="#d4d6d0"/><stop offset=".18" stop-color="#9b9f9b"/><stop offset=".4" stop-color="#50585a"/><stop offset=".56" stop-color="#bbc0b9"/><stop offset=".7" stop-color="#747d7e"/><stop offset="1" stop-color="#454c50"/></linearGradient>' +
       '<linearGradient id="sc-coil-standard" x2="0" y2="1"><stop stop-color="#777f82"/><stop offset=".18" stop-color="#c0c4c1"/><stop offset=".35" stop-color="#424b4d"/><stop offset=".65" stop-color="#272c2e"/><stop offset="1" stop-color="#7c8688"/></linearGradient>' +
       '<linearGradient id="sc-coil-duramaster" x2="0" y2="1"><stop stop-color="#656b6b"/><stop offset=".18" stop-color="#969e9a"/><stop offset=".4" stop-color="#202628"/><stop offset=".8" stop-color="#151a1b"/><stop offset="1" stop-color="#616a67"/></linearGradient>' +
@@ -82,13 +104,13 @@
       '</g><path d="M450 65v16" stroke="#c4b18a" stroke-opacity=".55"/><text x="450" y="59" fill="#c5c0b2" font-family="system-ui,sans-serif" font-size="9" letter-spacing="1.5" text-anchor="middle">TORSION SPRING ASSEMBLY</text></svg>';
   }
   function read() {
-    return { door: $('[name="sc-door"]:checked').value, count: Number($('#sc-count').value), tier: $('#sc-finish').value, size: $('#sc-size').value, urgency: Number($('#sc-urgency').value) };
+    return { door: $('[name="sc-door"]:checked').value, count: Number($('#sc-count').value), tier: $('#sc-finish').value, profile: $('#sc-profile').value, urgency: Number($('#sc-urgency').value) };
   }
   function render() {
     const state = read(), quote = calculateSpringEstimate(state);
-    $('[data-sc-scene]').innerHTML = diagram(state);
+    $('[data-sc-scene]').innerHTML = diagram({ ...state, count: quote.count });
     $('[data-sc-finish]').textContent = quote.name + ' · ' + quote.warranty + '-year warranty';
-    $('[data-sc-door]').textContent = (state.door === 'double' ? 'Double door' : 'Single door') + ' · ' + state.count + '-spring configuration';
+    $('[data-sc-door]').textContent = (state.door === 'double' ? 'Double-car' : 'Single-car') + ' · ' + quote.construction + ' · ' + quote.count + ' springs';
     $('[data-sc-installation]').textContent = money(quote.installation);
     $('[data-sc-afterhours]').textContent = money(quote.afterHours);
     $('[data-sc-total]').textContent = money(quote.total);
@@ -96,20 +118,34 @@
     $('[data-sc-unit-price]').textContent = money(quote.unitPrice) + ' × ' + quote.count + (quote.count === 1 ? ' spring' : ' springs');
     $('[data-sc-warranty]').textContent = quote.warranty + '-year warranty';
     $('[data-sc-spec]').textContent = 'Base reference: ' + quote.baseSpec + '. Length and inside diameter are confirmed by your technician.';
-    $('[data-sc-size-price]').textContent = 'Each size step above .207 adds $10 per spring. Selected size adjustment: ' + money(quote.sizeStep * 10) + ' per spring.';
+    $('[data-sc-setup]').textContent = quote.count + ' × ' + quote.size + ' in. torsion springs';
+    $('[data-sc-size-price]').textContent = 'Door-construction estimating preset · ' + money(quote.sizeStep * 10) + ' size adjustment per spring.';
+    $('#sc-count').value = String(quote.count);
+    $('#sc-count').disabled = !!DOORS[state.profile].count;
+    $('[data-sc-count-note]').textContent = DOORS[state.profile].count ? 'This door preset uses four springs. Four-spring installation labor is $250.' : 'Single-car defaults to one spring; double-car defaults to two. Your technician confirms the actual configuration.';
     $('[data-sc-urgency]').textContent = URGENCY[state.urgency];
     $('[data-sc-dispatch]').textContent = URGENCY[state.urgency];
     $('[data-sc-dispatch]').dataset.urgency = state.urgency;
     $('#sc-urgency').style.setProperty('--sc-fill', (state.urgency * 50) + '%');
     $('#sc-urgency').setAttribute('aria-valuetext', URGENCY[state.urgency]);
     $('[data-sc-availability]').textContent = state.urgency === 2 ? 'After-hours charge applies to appointments at 7 PM or later. Call to confirm availability.' : state.urgency === 1 ? 'Priority is a request, not a guaranteed arrival time. Call to confirm the next available route.' : 'Scheduling is confirmed based on technician, route and parts availability.';
-    const selection = (state.door === 'double' ? 'Double door' : 'Single door') + ', ' + state.count + ' spring(s), ' + quote.name + ', ' + quote.size + ' wire, ' + quote.warranty + '-year warranty, ' + URGENCY[state.urgency] + '. Estimated installed total before tax: ' + money(quote.total) + '.';
+    const selection = (state.door === 'double' ? 'Double-car' : 'Single-car') + ', ' + quote.construction + ', ' + quote.count + ' spring(s), ' + quote.name + ', ' + quote.size + ' wire, ' + quote.warranty + '-year warranty, ' + URGENCY[state.urgency] + '. Estimated installed total before tax: ' + money(quote.total) + '.';
     $('[data-sc-text]').href = 'sms:+19254094974?body=' + encodeURIComponent('Hi Valiant, I would like a spring replacement quote. ' + selection + ' I can attach a photo of the existing spring system.');
   }
+  function profilesForCategory() {
+    const entries = Object.entries(DOORS).filter(([, p]) => p.category === $('#sc-type').value);
+    $('#sc-profile').replaceChildren(...entries.map(([value, p]) => {
+      const option = document.createElement('option'); option.value = value; option.textContent = p.name; return option;
+    }));
+  }
   root.addEventListener('change', event => {
-    if (event.target.name === 'sc-door') $('#sc-count').value = event.target.value === 'double' ? '2' : '1';
+    if (event.target.id === 'sc-type') profilesForCategory();
+    if (event.target.name === 'sc-door' || ['sc-type', 'sc-profile'].includes(event.target.id)) {
+      $('#sc-count').value = String(DOORS[$('#sc-profile').value].count || ($('[name="sc-door"]:checked').value === 'double' ? 2 : 1));
+    }
     render();
   });
   $('#sc-urgency').addEventListener('input', render);
+  profilesForCategory();
   render();
 })();

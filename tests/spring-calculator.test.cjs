@@ -1,7 +1,7 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
-const {calculateSpringEstimate,WIRE_SIZES}=require('../public/js/spring-calculator.js');
-const base={tier:'endurance',count:2,size:'.207',urgency:0};
+const {calculateSpringEstimate,DOORS}=require('../public/js/spring-calculator.js');
+const base={tier:'endurance',door:'double',count:2,profile:'steel25',urgency:0};
 test('page retains the approved non-calculator copy and current spring policy',()=>{
   const fs=require('node:fs'),{load}=require('cheerio');
   const {mainDigest}=require('./helpers/editorial-copy.cjs');
@@ -20,19 +20,35 @@ test('all three packages include actual spring costs and the stated warranties',
     assert.equal(q.installation,189);assert.equal(q.total,price*2+189);
   }
 });
-test('every wire-size step adds $10 to each spring, not once to the job',()=>{
-  WIRE_SIZES.forEach((size,index)=>{
-    const q=calculateSpringEstimate({...base,size});
-    assert.equal(q.unitPrice,99+index*10);assert.equal(q.parts,(99+index*10)*2);
-    assert.equal(q.total,(99+index*10)*2+189);
-  });
+test('door construction chooses the owner-specified wire size and per-spring price',()=>{
+  for(const [profile,size,unit] of [['steel25','.207',99],['steel24','.218',109],['insulated138','.225',119],['insulated2','.234',129],['wood','.250',149],['backedwood','.262',159]]){
+    const q=calculateSpringEstimate({...base,profile});
+    assert.equal(q.size,size);assert.equal(q.unitPrice,unit);assert.equal(q.parts,unit*2);assert.equal(q.total,unit*2+189);
+  }
+});
+test('carriage and full-view presets always use all four springs and $250 labor',()=>{
+  for(const [profile,size,unit,total] of [['carriage234','.234',129,766],['carriage250','.250',149,846],['fullview','.218',109,686]]){
+    for(const door of ['single','double']){
+      const q=calculateSpringEstimate({...base,door,profile,count:1});
+      assert.equal(q.count,4);assert.equal(q.size,size);assert.equal(q.parts,unit*4);assert.equal(q.installation,250);assert.equal(q.total,total);
+    }
+  }
+  assert.equal(calculateSpringEstimate({...base,profile:'fullview',tier:'max',urgency:2}).total,985);
+});
+test('all door presets retain the $10 per wire-size step rule for each selected package',()=>{
+  for(const profile of Object.keys(DOORS)){
+    for(const [tier,price] of [['endurance',99],['pro',129],['max',149]]){
+      const q=calculateSpringEstimate({...base,profile,tier});
+      assert.equal(q.unitPrice,price+q.sizeStep*10);assert.equal(q.parts,q.unitPrice*q.count);
+    }
+  }
 });
 test('single-spring installation and $99 after-hours fee are included in installed total',()=>{
-  const q=calculateSpringEstimate({...base,tier:'max',count:1,size:'.225',urgency:2});
+  const q=calculateSpringEstimate({...base,tier:'max',count:1,profile:'insulated138',urgency:2});
   assert.equal(q.parts,169);assert.equal(q.installation,159);assert.equal(q.afterHours,99);assert.equal(q.total,427);
   assert.equal(calculateSpringEstimate({...base,urgency:1}).afterHours,0);
 });
 test('invalid selections cannot yield NaN or negative prices',()=>{
-  const q=calculateSpringEstimate({tier:'invalid',count:-1,size:'invalid',urgency:100});
+  const q=calculateSpringEstimate({tier:'invalid',count:-1,profile:'invalid',urgency:100});
   assert.equal(q.total,387);assert.equal(q.warranty,5);assert.equal(q.afterHours,0);
 });
