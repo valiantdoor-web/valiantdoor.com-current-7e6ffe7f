@@ -11,7 +11,7 @@ test('page retains the approved non-calculator copy and current spring policy',(
   assert.match($('section[aria-labelledby="spring-service-policies"]').text(),/\$99 after-hours/);
   assert.ok(!html.includes('Upgrade quoted separately'));
   $('[data-spring-calculator]').remove();
-  assert.equal(mainDigest($.html()),'ec99d895ddf68c61d6fc3e5ca4f2bcc31843409518c17b2037a7bca8d640d156');
+  assert.equal(mainDigest($.html()),'3aaef7e0fde6a6ff0d67fb0ac022872076165e2c4b407d0ea1bc9736ebeda123');
 });
 test('all three packages include actual spring costs and the stated warranties',()=>{
   for(const [tier,price,warranty] of [['endurance',99,5],['pro',129,5],['max',149,10]]){
@@ -51,4 +51,19 @@ test('single-spring installation and $99 after-hours fee are included in install
 test('invalid selections cannot yield NaN or negative prices',()=>{
   const q=calculateSpringEstimate({tier:'invalid',count:-1,profile:'invalid',urgency:100});
   assert.equal(q.total,387);assert.equal(q.warranty,5);assert.equal(q.afterHours,0);
+});
+test('rebuild and conversion parts packages add $250 labor without charging springs twice',()=>{
+  for(const [service,count,parts,total] of [['hilift',1,459,709],['hilift',2,459,709],['wayne',1,549,799],['wayne',2,649,899],['rebuild',1,459,709],['rebuild',2,549,799]]){
+    for(const tier of ['endurance','pro','max']){
+      const q=calculateSpringEstimate({...base,service,count,tier,profile:'wood'});
+      assert.equal(q.parts,parts);assert.equal(q.installation,250);assert.equal(q.total,total);assert.equal(q.needsQuote,false);
+      assert.equal(calculateSpringEstimate({...base,service,count,tier,urgency:2}).total,total+99);
+    }
+  }
+});
+test('four-spring conversion and rebuild packages require a custom parts quote',()=>{
+  for(const service of ['hilift','wayne','rebuild']){
+    const q=calculateSpringEstimate({...base,service,profile:'fullview'});
+    assert.equal(q.count,4);assert.equal(q.parts,null);assert.equal(q.total,null);assert.equal(q.installation,250);assert.equal(q.needsQuote,true);
+  }
 });

@@ -8,6 +8,12 @@
     max: { name: 'Valiant Endurance Max', base: 149, warranty: 10, finish: 'endurance', baseSpec: '.207 × 31 / 1.75"' }
   });
   const URGENCY = ['Scheduled daytime', 'Priority daytime request', 'After hours · 7 PM or later'];
+  const SERVICES = Object.freeze({
+    springs: { name: 'Spring replacement' },
+    hilift: { name: 'Hi-lift rebuild / conversion', parts: 459 },
+    wayne: { name: 'Wayne Dalton TorqueMaster conversion' },
+    rebuild: { name: 'Complete torsion rebuild' }
+  });
   const DOORS = Object.freeze({
     steel25: { category: 'noninsulated', name: '25-gauge steel', size: '.207' },
     steel24: { category: 'noninsulated', name: '24-gauge steel', size: '.218' },
@@ -31,7 +37,11 @@
     const parts = unitPrice * count;
     const installation = INSTALLATION[count];
     const afterHours = urgency === 2 ? 99 : 0;
-    return { tier, profile, construction: door.name, category: door.category, name: spring.name, warranty: spring.warranty, baseSpec: spring.baseSpec, size: door.size, sizeStep, unitPrice, parts, installation, afterHours, total: parts + installation + afterHours, count, urgency };
+    const service = Object.hasOwn(SERVICES, input.service) ? input.service : 'springs';
+    const packageParts = count === 4 ? null : service === 'wayne' ? ({ 1: 549, 2: 649 }[count] ?? null) : service === 'rebuild' ? ({ 1: 459, 2: 549 }[count] ?? null) : SERVICES[service].parts;
+    const selectedParts = service === 'springs' ? parts : packageParts;
+    const selectedLabor = service === 'springs' ? installation : 250;
+    return { service, serviceName: SERVICES[service].name, needsQuote: selectedParts === null, tier, profile, construction: door.name, category: door.category, name: spring.name, warranty: spring.warranty, baseSpec: spring.baseSpec, size: door.size, sizeStep, unitPrice, parts: selectedParts, installation: selectedLabor, afterHours, total: selectedParts === null ? null : selectedParts + selectedLabor + afterHours, count, urgency };
   }
   if (typeof module !== 'undefined' && module.exports) module.exports = { calculateSpringEstimate, WIRE_SIZES, DOORS };
   if (typeof document === 'undefined') return;
@@ -39,12 +49,52 @@
   if (!root) return;
   const $ = s => root.querySelector(s);
   const money = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+  let doorPosition = 0, doorTarget = 0, motionFrame = 0;
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const COMPONENTS = {
+    springs: 'Torsion springs counterbalance the door. Your selected package, wire size and spring count update the system above.',
+    cables: 'Lift cables travel around the drums as the door moves. The technician checks cable condition, routing and tension during service.',
+    tracks: 'Rollers guide the sectional door into its overhead tracks. Track alignment and a balanced door help the system move smoothly.'
+  };
+  function applyDoorPosition() {
+    const lift = doorPosition * 258;
+    $('[data-sc-door-leaf]').setAttribute('transform', 'translate(0 ' + -lift + ')');
+    root.querySelectorAll('[data-sc-cable]').forEach(el => el.setAttribute('d', 'M' + el.dataset.x + ' 131V' + Math.max(143, 396 - lift)));
+    root.querySelectorAll('[data-sc-rotation]').forEach(el => {
+      el.setAttribute('transform', 'translate(0 ' + (Math.sin(doorPosition * Math.PI * 14) * 11).toFixed(2) + ')');
+      el.setAttribute('opacity', String(.35 + .65 * Math.abs(Math.cos(doorPosition * Math.PI * 14))));
+    });
+    $('#sc-position').value = String(Math.round(doorPosition * 100));
+    $('#sc-position').style.setProperty('--sc-fill', (doorPosition * 100) + '%');
+    const status = doorPosition < .005 ? 'Closed' : doorPosition > .995 ? 'Open' : Math.round(doorPosition * 100) + '% open';
+    $('[data-sc-position]').textContent = status;
+    $('#sc-position').setAttribute('aria-valuetext', status);
+    $('[data-sc-scene]').dataset.position = doorPosition.toFixed(3);
+    root.querySelectorAll('[data-sc-operate]').forEach(button => {
+      const closing = doorTarget > .5;
+      button.setAttribute('aria-label', closing ? 'Close the illustrated garage door' : 'Open the illustrated garage door');
+      button.textContent = button.classList.contains('sc-door-touch') ? (closing ? 'Tap to close' : 'Tap the door to open') : (closing ? 'Close door' : 'Open door');
+    });
+  }
+  function moveDoor(target) {
+    cancelAnimationFrame(motionFrame);
+    doorTarget = target;
+    if (reducedMotion.matches) { doorPosition = target; applyDoorPosition(); return; }
+    const start = doorPosition, started = performance.now(), duration = Math.max(180, Math.abs(target - start) * 1900);
+    function step(now) {
+      const t = Math.min(1, (now - started) / duration), ease = t * t * (3 - 2 * t);
+      doorPosition = start + (target - start) * ease;
+      applyDoorPosition();
+      if (t < 1) motionFrame = requestAnimationFrame(step);
+    }
+    motionFrame = requestAnimationFrame(step);
+  }
   function coil(x, y, length, finish, mirrored) {
     const turns = Math.floor(length / 3.6);
     const wire = Array.from({ length: turns }, (_, i) => '<ellipse cx="' + (x + 4 + i * (length - 8) / (turns - 1)).toFixed(1) + '" cy="' + y + '" rx="3.6" ry="15.5" fill="none" stroke="url(#sc-coil-' + finish + ')" stroke-width="2.6"/>').join('');
     const fixed = mirrored ? x + length : x;
     const winding = mirrored ? x : x + length;
-    return '<g class="sc-spring"><rect x="' + x + '" y="' + (y - 13) + '" width="' + length + '" height="26" rx="10" fill="#0d0f10"/>' + wire +
+    return '<g class="sc-spring" data-sc-inspect="springs"><rect x="' + x + '" y="' + (y - 13) + '" width="' + length + '" height="26" rx="10" fill="#0d0f10"/>' + wire + '<rect data-sc-rotation x="' + (x + length / 2) + '" y="110" width="4" height="3" rx="1" fill="#e4c27e"/>' +
       '<path d="M' + (fixed - 7) + ' ' + (y - 11) + 'h14v22h-14z" fill="url(#sc-metal)"/><rect x="' + (winding - 10) + '" y="' + (y - 11) + '" width="20" height="22" rx="3" fill="url(#sc-metal)"/><ellipse cx="' + winding + '" cy="' + y + '" rx="5.5" ry="13" fill="#33383b" stroke="#8d9292"/><circle cx="' + winding + '" cy="' + (y - 7) + '" r="2" fill="' + (mirrored ? '#903a30' : '#313336') + '"/><circle cx="' + winding + '" cy="' + (y + 7) + '" r="2" fill="#121516"/></g>';
   }
   function diagram(state) {
@@ -77,9 +127,9 @@
       : state.count === 2
         ? coil(mid - coilLength - 18, shaftY, coilLength, finish, true) + coil(mid + 18, shaftY, coilLength, finish, false)
         : coil(mid - coilLength * 1.18 - 18, shaftY, coilLength * 1.18, finish, true);
-    const drum = x => '<g><path d="M' + (x - 16) + ' 93h32v38h-32z" fill="url(#sc-metal)" stroke="#4c5355"/>' + [0, 1, 2, 3, 4].map(i => '<ellipse cx="' + (x - 12 + i * 6) + '" cy="112" rx="4" ry="21" fill="none" stroke="' + (i % 2 ? '#9b9e9b' : '#424b4f') + '" stroke-width="2.4"/>').join('') + '<rect x="' + (x - 5) + '" y="107" width="10" height="10" rx="2" fill="#656e70"/></g>';
+    const drum = x => '<g data-sc-inspect="cables"><path d="M' + (x - 16) + ' 93h32v38h-32z" fill="url(#sc-metal)" stroke="#4c5355"/>' + [0, 1, 2, 3, 4].map(i => '<ellipse cx="' + (x - 12 + i * 6) + '" cy="112" rx="4" ry="21" fill="none" stroke="' + (i % 2 ? '#9b9e9b' : '#424b4f') + '" stroke-width="2.4"/>').join('') + '<rect data-sc-rotation x="' + (x - 12) + '" y="110" width="24" height="3" rx="1" fill="#e4c27e"/><rect x="' + (x - 5) + '" y="107" width="10" height="10" rx="2" fill="#656e70"/></g>';
     return '<svg viewBox="0 0 900 475" role="img" aria-label="Illustration of a ' + (doubleDoor ? 'double-car' : 'single-car') + ' ' + profile.name + ' garage door with ' + state.count + ' torsion spring' + (state.count === 1 ? '' : 's') + ', cable drums, lift cables, hinges and steel tracks"><defs>' +
-      '<linearGradient id="sc-wall" x2="0" y2="1"><stop stop-color="#353638"/><stop offset=".65" stop-color="#232527"/><stop offset="1" stop-color="#1a1c1d"/></linearGradient>' +
+      '<clipPath id="sc-opening"><rect x="' + (left - 10) + '" y="145" width="' + (width + 20) + '" height="265"/></clipPath><linearGradient id="sc-outside" x2="0" y2="1"><stop stop-color="#8ca5aa"/><stop offset=".58" stop-color="#ccd0bd"/><stop offset=".59" stop-color="#717a70"/><stop offset="1" stop-color="#444d4a"/></linearGradient><linearGradient id="sc-wall" x2="0" y2="1"><stop stop-color="#353638"/><stop offset=".65" stop-color="#232527"/><stop offset="1" stop-color="#1a1c1d"/></linearGradient>' +
       '<linearGradient id="sc-door" x2=".1" y2="1"><stop stop-color="' + (woodDoor ? '#ac855a' : glassDoor ? '#9eabad' : '#acb0a7') + '"/><stop offset=".4" stop-color="' + (woodDoor ? '#8b6541' : glassDoor ? '#6b7d82' : '#858d85') + '"/><stop offset="1" stop-color="' + (woodDoor ? '#5e412a' : '#6b746e') + '"/></linearGradient>' +
       '<linearGradient id="sc-inset" x2="0" y2="1"><stop stop-color="' + (woodDoor ? '#795235' : '#747e77') + '"/><stop offset=".1" stop-color="' + (woodDoor ? '#b08857' : '#9ea59b') + '"/><stop offset=".8" stop-color="' + (woodDoor ? '#987146' : '#929a90') + '"/><stop offset="1" stop-color="' + (woodDoor ? '#69472b' : '#686f69') + '"/></linearGradient>' +
       '<linearGradient id="sc-glass" x2=".8" y2="1"><stop stop-color="#799299"/><stop offset=".4" stop-color="#3b5862"/><stop offset="1" stop-color="#263c44"/></linearGradient>' +
@@ -91,33 +141,37 @@
       '<filter id="sc-shadow" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="7" stdDeviation="7" flood-opacity=".45"/></filter>' +
       '<filter id="sc-grain"><feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope=".035"/></feComponentTransfer><feBlend in="SourceGraphic" mode="soft-light"/></filter></defs>' +
       '<rect width="900" height="475" fill="url(#sc-wall)"/><path d="M0 74h900M0 288h900M120 0v408M782 0v408" stroke="#aaa" stroke-opacity=".045"/><ellipse cx="450" cy="50" rx="430" ry="280" fill="url(#sc-light)"/><path d="M0 412h900v63H0z" fill="#1a1c1d"/><path d="M0 412h900" stroke="#51504a" stroke-opacity=".4"/><ellipse cx="450" cy="420" rx="' + (width / 2 + 25) + '" ry="11" fill="#080b0c" opacity=".7"/>' +
-      '<path d="M' + (left - 17) + ' 408V161q0-36 25-55l45-30M' + (right + 17) + ' 408V161q0-36-25-55l-45-30" fill="none" stroke="#8d9392" stroke-width="7"/><path d="M' + (left - 17) + ' 408V161q0-36 25-55l45-30M' + (right + 17) + ' 408V161q0-36-25-55l-45-30" fill="none" stroke="#d4d8d0" stroke-opacity=".45" stroke-width="1.4"/>' +
-      '<rect x="' + (left - 5) + '" y="143" width="' + (width + 10) + '" height="267" rx="3" fill="#0e1213" filter="url(#sc-shadow)"/><g filter="url(#sc-grain)"><rect x="' + left + '" y="150" width="' + width + '" height="250" rx="2" fill="url(#sc-door)"/>' + panels + hinges + '</g>' +
-      '<rect x="' + left + '" y="398" width="' + width + '" height="10" fill="#131817"/><rect x="438" y="351" width="24" height="6" rx="3" fill="#262e2b" stroke="#adb2a7" stroke-width="1"/>' +
+      '<g data-sc-inspect="tracks"><path d="M' + (left - 17) + ' 408V161q0-36 25-55l45-30M' + (right + 17) + ' 408V161q0-36-25-55l-45-30" fill="none" stroke="#8d9392" stroke-width="7"/><path d="M' + (left - 17) + ' 408V161q0-36 25-55l45-30M' + (right + 17) + ' 408V161q0-36-25-55l-45-30" fill="none" stroke="#d4d8d0" stroke-opacity=".45" stroke-width="1.4"/></g>' +
+      '<rect x="' + (left - 5) + '" y="143" width="' + (width + 10) + '" height="267" rx="3" fill="#0e1213" filter="url(#sc-shadow)"/><g clip-path="url(#sc-opening)"><rect x="' + left + '" y="150" width="' + width + '" height="258" fill="url(#sc-outside)"/><path d="M' + left + ' 300q70-45 150-9t160-7t180 6t150-5v35H' + left + 'z" fill="#394b40" opacity=".75"/><path d="M' + (left + width * .3) + ' 408l' + (width * .16) + '-94h' + (width * .08) + 'l' + (width * .16) + ' 94" fill="#a8aaa0" opacity=".4"/><g data-sc-door-leaf><g filter="url(#sc-grain)"><rect x="' + left + '" y="150" width="' + width + '" height="250" rx="2" fill="url(#sc-door)"/>' + panels + hinges + '</g>' +
+      '<rect x="' + left + '" y="398" width="' + width + '" height="10" fill="#131817"/><rect x="438" y="351" width="24" height="6" rx="3" fill="#262e2b" stroke="#adb2a7" stroke-width="1"/>' + [left + 8, right - 8].map(x => '<path d="M' + (x - 7) + ' 390h14v13h-14z" fill="url(#sc-metal)" stroke="#434f4c"/>').join('') + '</g></g>' +
       '<g filter="url(#sc-shadow)"><rect x="' + (left - 21) + '" y="108" width="' + (width + 42) + '" height="7" rx="3" fill="url(#sc-metal)"/>' +
       '<path d="M' + (left - 26) + ' 83h16v59h-16zM' + (right + 10) + ' 83h16v59h-16z" fill="url(#sc-metal)" stroke="#383e3e"/><rect x="442" y="88" width="16" height="47" rx="2" fill="url(#sc-metal)"/><circle cx="450" cy="112" r="8" fill="#4c5657" stroke="#bfc4bd"/>' +
       springs + drum(left + 10) + drum(right - 10) + '</g>' +
-      '<path d="M' + (left + 8) + ' 131v265M' + (right - 8) + ' 131v265" stroke="#c4c5b9" stroke-width="1.1" opacity=".9"/>' +
-      [left + 8, right - 8].map(x => '<path d="M' + (x - 7) + ' 390h14v13h-14z" fill="url(#sc-metal)" stroke="#434f4c"/><circle cx="' + x + '" cy="396" r="2" fill="#313c36"/>').join('') +
+      '<g data-sc-inspect="cables" stroke="#c4c5b9" stroke-width="1.1" opacity=".9">' + [left + 8, right - 8].map(x => '<path data-sc-cable data-x="' + x + '" d="M' + x + ' 131v265"/>').join('') + '</g>' +
       '<path d="M' + (left - 22) + ' 152v254M' + (right + 22) + ' 152v254" stroke="#454e4e" stroke-width="2"/><g fill="#c4c7be">' +
       [164, 220, 282, 344, 397].map(y => '<circle cx="' + (left - 17) + '" cy="' + y + '" r="3"/><circle cx="' + (right + 17) + '" cy="' + y + '" r="3"/>').join('') +
       '</g><path d="M450 65v16" stroke="#c4b18a" stroke-opacity=".55"/><text x="450" y="59" fill="#c5c0b2" font-family="system-ui,sans-serif" font-size="9" letter-spacing="1.5" text-anchor="middle">TORSION SPRING ASSEMBLY</text></svg>';
   }
   function read() {
-    return { door: $('[name="sc-door"]:checked').value, count: Number($('#sc-count').value), tier: $('#sc-finish').value, profile: $('#sc-profile').value, urgency: Number($('#sc-urgency').value) };
+    return { service: $('#sc-service').value, door: $('[name="sc-door"]:checked').value, count: Number($('#sc-count').value), tier: $('#sc-finish').value, profile: $('#sc-profile').value, urgency: Number($('#sc-urgency').value) };
   }
   function render() {
     const state = read(), quote = calculateSpringEstimate(state);
     $('[data-sc-scene]').innerHTML = diagram({ ...state, count: quote.count });
-    $('[data-sc-finish]').textContent = quote.name + ' · ' + quote.warranty + '-year warranty';
+    applyDoorPosition();
+    const packaged = quote.service !== 'springs';
+    $('[data-sc-finish]').textContent = packaged ? quote.serviceName : quote.name + ' · ' + quote.warranty + '-year warranty';
+    $('#sc-finish').disabled = packaged;
     $('[data-sc-door]').textContent = (state.door === 'double' ? 'Double-car' : 'Single-car') + ' · ' + quote.construction + ' · ' + quote.count + ' springs';
     $('[data-sc-installation]').textContent = money(quote.installation);
     $('[data-sc-afterhours]').textContent = money(quote.afterHours);
-    $('[data-sc-total]').textContent = money(quote.total);
-    $('[data-sc-hardware]').textContent = money(quote.parts);
-    $('[data-sc-unit-price]').textContent = money(quote.unitPrice) + ' × ' + quote.count + (quote.count === 1 ? ' spring' : ' springs');
-    $('[data-sc-warranty]').textContent = quote.warranty + '-year warranty';
-    $('[data-sc-spec]').textContent = 'Base reference: ' + quote.baseSpec + '. Length and inside diameter are confirmed by your technician.';
+    $('[data-sc-total]').textContent = quote.needsQuote ? 'Custom quote' : money(quote.total);
+    $('[data-sc-total-label]').textContent = packaged ? 'Starting installed estimate' : 'Estimated installed price';
+    $('[data-sc-hardware]').textContent = quote.needsQuote ? 'Quote required' : money(quote.parts);
+    $('[data-sc-unit-price]').textContent = packaged ? 'Complete parts package · starting price' : money(quote.unitPrice) + ' × ' + quote.count + (quote.count === 1 ? ' spring' : ' springs');
+    $('[data-sc-warranty]').textContent = packaged ? 'Package coverage confirmed on your estimate' : quote.warranty + '-year warranty';
+    $('[data-sc-spec]').textContent = packaged ? 'Package price replaces individual spring pricing. Parts and final configuration are confirmed on site.' : 'Base reference: ' + quote.baseSpec + '. Length and inside diameter are confirmed by your technician.';
+    $('[data-sc-service-note]').textContent = quote.needsQuote ? 'This configuration needs a custom parts quote. Installation labor is $250; after-hours service adds $99 when selected.' : packaged ? quote.serviceName + ': parts package from ' + money(quote.parts) + ' + $250 installation labor. Selected after-hours service adds $99. Final scope and package suitability are confirmed on site.' : 'Spring price includes your selected Endurance package, size adjustment and replacement count. Installation is itemized separately below.';
     $('[data-sc-setup]').textContent = quote.count + ' × ' + quote.size + ' in. torsion springs';
     $('[data-sc-size-price]').textContent = 'Door-construction estimating preset · ' + money(quote.sizeStep * 10) + ' size adjustment per spring.';
     $('#sc-count').value = String(quote.count);
@@ -129,7 +183,7 @@
     $('#sc-urgency').style.setProperty('--sc-fill', (state.urgency * 50) + '%');
     $('#sc-urgency').setAttribute('aria-valuetext', URGENCY[state.urgency]);
     $('[data-sc-availability]').textContent = state.urgency === 2 ? 'After-hours charge applies to appointments at 7 PM or later. Call to confirm availability.' : state.urgency === 1 ? 'Priority is a request, not a guaranteed arrival time. Call to confirm the next available route.' : 'Scheduling is confirmed based on technician, route and parts availability.';
-    const selection = (state.door === 'double' ? 'Double-car' : 'Single-car') + ', ' + quote.construction + ', ' + quote.count + ' spring(s), ' + quote.name + ', ' + quote.size + ' wire, ' + quote.warranty + '-year warranty, ' + URGENCY[state.urgency] + '. Estimated installed total before tax: ' + money(quote.total) + '.';
+    const selection = quote.serviceName + ': ' + (state.door === 'double' ? 'Double-car' : 'Single-car') + ', ' + quote.construction + ', ' + quote.count + ' spring(s), ' + quote.size + ' wire preset, ' + (packaged ? 'package coverage to be confirmed' : quote.name + ', ' + quote.warranty + '-year warranty') + ', ' + URGENCY[state.urgency] + '. ' + (quote.needsQuote ? 'Custom parts quote required; installation labor $250.' : (packaged ? 'Starting' : 'Estimated') + ' installed total before tax: ' + money(quote.total) + '.');
     $('[data-sc-text]').href = 'sms:+19254094974?body=' + encodeURIComponent('Hi Valiant, I would like a spring replacement quote. ' + selection + ' I can attach a photo of the existing spring system.');
   }
   function profilesForCategory() {
@@ -139,11 +193,26 @@
     }));
   }
   root.addEventListener('change', event => {
+    if (event.target.id === 'sc-position') return;
     if (event.target.id === 'sc-type') profilesForCategory();
     if (event.target.name === 'sc-door' || ['sc-type', 'sc-profile'].includes(event.target.id)) {
       $('#sc-count').value = String(DOORS[$('#sc-profile').value].count || ($('[name="sc-door"]:checked').value === 'double' ? 2 : 1));
     }
     render();
+  });
+  root.addEventListener('click', event => {
+    if (event.target.closest('[data-sc-operate]')) moveDoor(doorTarget > .5 ? 0 : 1);
+    const component = event.target.closest('[data-sc-inspect]')?.dataset.scInspect;
+    if (COMPONENTS[component]) {
+      root.dataset.inspect = component;
+      $('[data-sc-help]').textContent = COMPONENTS[component];
+      root.querySelectorAll('button[data-sc-inspect]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.scInspect === component)));
+    }
+  });
+  $('#sc-position').addEventListener('input', event => {
+    cancelAnimationFrame(motionFrame);
+    doorPosition = Number(event.target.value) / 100; doorTarget = doorPosition;
+    applyDoorPosition();
   });
   $('#sc-urgency').addEventListener('input', render);
   profilesForCategory();
