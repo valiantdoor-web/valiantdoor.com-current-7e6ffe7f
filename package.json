@@ -8,10 +8,10 @@
     "lib": "lib"
   },
   "scripts": {
-    "vercel-build": "node scripts/refresh-related-projects.cjs && node scripts/refresh-seo-reference.cjs && node scripts/refresh-seo-completion.cjs && node scripts/refresh-page-styles.cjs && node scripts/refresh-business-credentials.cjs && node scripts/refresh-tracking-assets.cjs && node scripts/inject-speed-insights.mjs",
+    "vercel-build": "node scripts/refresh-related-projects.cjs && node scripts/refresh-seo-reference.cjs && node scripts/refresh-seo-completion.cjs && node scripts/refresh-page-styles.cjs && node scripts/refresh-business-credentials.cjs && node scripts/refresh-tracking-assets.cjs && node scripts/inject-speed-insights.mjs && node scripts/remove-obsolete-searchatlas.cjs && node scripts/refresh-video-url-semantics.cjs && node scripts/refresh-image-dimensions.cjs",
     "dev": "node server.js",
     "start": "node server.js",
-    "test": "node scripts/refresh-business-credentials.cjs && node -e \"require('./api/authority-dashboard.js'); console.log('authority dashboard api ok')\" && node tests/test-blog-publishing.cjs && node tests/test-blog-sync.cjs && npm run validate:indexing && python3 scripts/validate_site_seo.py && node --test tests/business-schema.test.cjs tests/nextdoor-attribution.test.cjs && npm run test:tracking && npm run test:site-audit && npm run test:seo-completion && npm run test:seo-reference && npm run test:editorial-copy && npm run test:agent-discovery && npm run test:spring-calculator",
+    "test": "node scripts/refresh-business-credentials.cjs && node -e \"require('./api/authority-dashboard.js'); console.log('authority dashboard api ok')\" && node tests/test-blog-publishing.cjs && node tests/test-blog-sync.cjs && npm run validate:indexing && python3 scripts/validate_site_seo.py && node --test tests/business-schema.test.cjs tests/nextdoor-attribution.test.cjs && npm run test:tracking && npm run test:site-audit && npm run test:seo-completion && npm run test:seo-reference && npm run test:editorial-copy && npm run test:agent-discovery && npm run test:spring-calculator && npm run test:surgical-fixes",
     "validate:indexing": "python3 scripts/validate_indexing_contract.py",
     "sync:reviews": "node --env-file-if-exists=/vercel/share/.env.project scripts/sync-review-schema.mjs",
     "index:site": "node index-site.js",
@@ -22,7 +22,8 @@
     "test:editorial-copy": "node --test tests/editorial-copy.test.cjs",
     "test:seo-completion": "node scripts/refresh-seo-completion.cjs && node --test tests/seo-completion.test.cjs",
     "test:agent-discovery": "node --test tests/webmcp.test.cjs tests/ai-catalog.test.cjs tests/agent-discovery-assets.test.cjs",
-    "test:spring-calculator": "node --test tests/spring-calculator.test.cjs"
+    "test:spring-calculator": "node --test tests/spring-calculator.test.cjs",
+    "test:surgical-fixes": "CHAT_TEST_MINIFIED=1 node --test tests/clarity-bootstrap.test.cjs tests/obsolete-searchatlas.test.cjs tests/blog-toc.test.cjs tests/video-url-semantics.test.cjs tests/image-dimensions.test.cjs tests/chat-on-demand.test.cjs tests/shared-asset-refresh.test.cjs"
   },
   "repository": {
     "type": "git",

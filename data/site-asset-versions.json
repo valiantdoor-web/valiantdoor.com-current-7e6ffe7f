@@ -8,8 +8,8 @@
   "/css/clopay-canyon-ridge.min.css": "/css/clopay-canyon-ridge.min.css?v=a9b8aa3b8559",
   "/css/credentials.css": "/css/credentials.min.css?v=c6b7a3ba5484",
   "/css/credentials.min.css": "/css/credentials.min.css?v=c6b7a3ba5484",
-  "/css/global-chrome.css": "/css/global-chrome.min.css?v=003ada6af170",
-  "/css/global-chrome.min.css": "/css/global-chrome.min.css?v=003ada6af170",
+  "/css/global-chrome.css": "/css/global-chrome.min.css?v=fa7313ee4a0f",
+  "/css/global-chrome.min.css": "/css/global-chrome.min.css?v=fa7313ee4a0f",
   "/css/infinity-shield.css": "/css/infinity-shield.min.css?v=6f222b9a0c09",
   "/css/infinity-shield.min.css": "/css/infinity-shield.min.css?v=6f222b9a0c09",
   "/css/nextdoor-emergency.css": "/css/nextdoor-emergency.min.css?v=2b7cfbe56738",
@@ -22,8 +22,8 @@
   "/js/clopay-nav-link.min.js": "/js/clopay-nav-link.min.js?v=f8a582c186eb",
   "/js/estimate-upload.js": "/js/estimate-upload.min.js?v=de732f83a507",
   "/js/estimate-upload.min.js": "/js/estimate-upload.min.js?v=de732f83a507",
-  "/js/global-chrome.js": "/js/global-chrome.min.js?v=10c04c1ebdd0",
-  "/js/global-chrome.min.js": "/js/global-chrome.min.js?v=10c04c1ebdd0",
+  "/js/global-chrome.js": "/js/global-chrome.min.js?v=d5806a68578c",
+  "/js/global-chrome.min.js": "/js/global-chrome.min.js?v=d5806a68578c",
   "/js/lead-capture.js": "/js/lead-capture.min.js?v=2022b9099bc5",
   "/js/lead-capture.min.js": "/js/lead-capture.min.js?v=2022b9099bc5",
   "/js/nextdoor-conversion.js": "/js/nextdoor-conversion.min.js?v=eb9526159a77",
@@ -41,5 +41,7 @@
   "/css/review-excerpts.css": "/css/review-excerpts.min.css?v=2fe98a1378df",
   "/css/review-excerpts.min.css": "/css/review-excerpts.min.css?v=2fe98a1378df",
   "/css/wayne-dalton.css": "/css/wayne-dalton.min.css?v=19e0dc75d269",
-  "/css/wayne-dalton.min.css": "/css/wayne-dalton.min.css?v=19e0dc75d269"
+  "/css/wayne-dalton.min.css": "/css/wayne-dalton.min.css?v=19e0dc75d269",
+  "/css/chat-launcher.css": "/css/chat-launcher.min.css?v=d1734eb5af5d",
+  "/css/chat-launcher.min.css": "/css/chat-launcher.min.css?v=d1734eb5af5d"
 }

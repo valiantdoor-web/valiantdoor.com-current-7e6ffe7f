@@ -1,4 +1,4 @@
-// Update immutable tracking URLs at build time without changing page content,
+// Update immutable shared script/style URLs at build time without changing page content,
 // canonical URLs, navigation or sitemap structure.
 const fs = require('node:fs');
 const path = require('node:path');
@@ -11,7 +11,7 @@ const walk = (dir) => fs.readdirSync(dir, { withFileTypes: true }).flatMap((entr
 let changed = 0;
 for (const file of [...walk(path.join(root, 'public')), path.join(root, 'lib/blog-index.html')]) {
   const before = fs.readFileSync(file, 'utf8');
-  const after = before.replace(/\/js\/(?:global-chrome|lead-capture|estimate-upload|main|webmcp)(?:\.min)?\.js(?:\?[^"'\s<>]*)?/g,
+  const after = before.replace(/(?:\/js\/(?:global-chrome|lead-capture|estimate-upload|main|webmcp)(?:\.min)?\.js|\/css\/global-chrome(?:\.min)?\.css)(?:\?[^"'\s<>]*)?/g,
     (url) => versions[url.split('?')[0]] || url);
   if (before !== after) { fs.writeFileSync(file, after); changed++; }
 }

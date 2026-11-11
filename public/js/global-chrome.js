@@ -87,6 +87,11 @@
   // Previously this was trapped inside setupDeferredHomepageTracking() which
   // only ran on page-home, leaving 100+ pages with zero session recording.
   (function loadClarity() {
+    // The provider bootstrap reads clarity.v and invokes this callable queue.
+    // Establish it before loading the tag; retain any existing consent queue.
+    window.clarity = window.clarity || function () {
+      (window.clarity.q = window.clarity.q || []).push(arguments);
+    };
     if (
       document.querySelector(
         'script[data-valiant-clarity], script[src*="clarity.ms/tag/xbiv7tx2p3"]'
@@ -294,24 +299,82 @@
     syncReviewStats();
   }
 
-  // Housecall Pro website chat. The provider script reads these exact attributes
-  // from its own script element before mounting the cross-origin chat iframe.
+  // Load the official HCP app only after explicit chat intent. The SMS link
+  // remains usable during loading or a script failure; no message is sent here.
   (function mountHousecallProChat() {
-    if (currentPath === "/business-card") return; // loaded by site-bot.js on the standalone card
-    if (document.getElementById("housecall-pro-chat-bubble") || document.getElementById("proChatIframe")) return;
-
-    const script = document.createElement("script");
-    script.id = "housecall-pro-chat-bubble";
-    script.src = "https://chat.housecallpro.com/proChat.js";
-    script.type = "text/javascript";
-    script.dataset.color = "#bcaa34";
-    script.dataset.organization = "544de216-f35f-4c0b-835a-7950591bbd80";
-    script.defer = true;
-    script.addEventListener("load", () => {
-      trackValiantAction("chat_widget_loaded", { provider: "housecall_pro" });
-    }, { once: true });
-
-    const add = () => document.body.appendChild(script);
+    const existing = () => document.getElementById("housecall-pro-chat-bubble") ||
+      document.getElementById("proChatIframe") || document.getElementById("valiant-chat-launcher");
+    if (existing()) return;
+    const add = () => {
+      if (existing()) return;
+      const hasSharedStyles = Array.from(document.querySelectorAll('link[rel~="stylesheet"][href]')).some((link) => {
+        try {
+          const url = new URL(link.href, window.location.href);
+          return url.origin === window.location.origin && /^\/css\/global-chrome(?:\.min)?\.css$/.test(url.pathname);
+        } catch { return false; }
+      });
+      // Custom landing pages intentionally omit the full shared stylesheet.
+      // Load only facade-scoped rules, never restyle their existing content.
+      if (!hasSharedStyles && !document.getElementById("valiant-chat-launcher-style")) {
+        const style = document.createElement("link");
+        style.id = "valiant-chat-launcher-style";
+        style.rel = "stylesheet";
+        style.href = "/css/chat-launcher.min.css?v=d1734eb5af5d";
+        (document.head || document.documentElement).appendChild(style);
+      }
+      const facade = document.createElement("aside");
+      facade.className = "global-chat-facade";
+      facade.setAttribute("aria-label", "Contact Valiant Garage Door");
+      facade.innerHTML = '<button id="valiant-chat-launcher" type="button">Chat with Valiant<span>Click to load secure chat</span></button><a href="sms:+19254094974">Or text us</a>';
+      const button = facade.querySelector("button");
+      let started = false;
+      button.addEventListener("click", () => {
+        if (started) return;
+        started = true;
+        button.disabled = true;
+        button.setAttribute("aria-busy", "true");
+        button.textContent = "Loading secure chat…";
+        const script = document.createElement("script");
+        script.id = "housecall-pro-chat-bubble";
+        script.src = "https://chat.housecallpro.com/proChat.js";
+        script.type = "text/javascript";
+        script.dataset.color = "#bcaa34";
+        script.dataset.organization = "544de216-f35f-4c0b-835a-7950591bbd80";
+        script.async = true;
+        let frameObserver;
+        let observedFrame = null;
+        const attachFrame = () => {
+          const frame = document.getElementById("proChatIframe");
+          if (!frame || frame === observedFrame) return;
+          observedFrame = frame;
+          frame.title = "Chat with Valiant Garage Door";
+          frame.addEventListener("load", () => {
+            if (frameObserver) frameObserver.disconnect();
+            facade.remove();
+          }, { once: true });
+        };
+        // The provider can append its frame before or after script.onload.
+        // Observe before insertion so a fast iframe load cannot miss its listener.
+        if (typeof MutationObserver === "function") {
+          frameObserver = new MutationObserver(attachFrame);
+          frameObserver.observe(document.body, { childList: true, subtree: true });
+        }
+        script.addEventListener("load", () => {
+          trackValiantAction("chat_widget_loaded", { provider: "housecall_pro" });
+          attachFrame();
+        }, { once: true });
+        script.addEventListener("error", () => {
+          if (frameObserver) frameObserver.disconnect();
+          started = false;
+          script.remove();
+          button.disabled = false;
+          button.removeAttribute("aria-busy");
+          button.textContent = "Retry chat · or text below";
+        }, { once: true });
+        document.body.appendChild(script);
+      });
+      document.body.appendChild(facade);
+    };
     if (document.body) add();
     else document.addEventListener("DOMContentLoaded", add, { once: true });
   })();

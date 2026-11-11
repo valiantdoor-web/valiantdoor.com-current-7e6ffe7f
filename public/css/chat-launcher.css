@@ -1,0 +1,7 @@
+/* Intent-only official Housecall Pro chat; scoped to this lightweight launcher. */
+.global-chat-facade{position:fixed;right:14px;bottom:14px;z-index:1199;display:flex;flex-direction:column;align-items:flex-end;gap:4px;max-width:calc(100vw - 28px);font-family:Arial,Helvetica,sans-serif}
+.global-chat-facade button{border:1px solid #e8b45a;border-radius:14px;background:#0b141d;color:#fff;padding:12px 18px;min-height:52px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 6px 22px #0006}
+.global-chat-facade button span{display:block;font-size:11px;font-weight:400;color:#f4d59c;margin-top:3px}.global-chat-facade button:disabled{cursor:progress}.global-chat-facade button:focus-visible,.global-chat-facade a:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.global-chat-facade>a{box-sizing:border-box;padding:7px 12px;min-height:32px;border-radius:8px;background:#0b141d;color:#f4d59c;font-size:12px;text-decoration:underline}
+@media(max-width:600px){.global-chat-facade{bottom:12px;right:10px}.global-chat-facade button{padding:10px 13px;font-size:13px}}
+@media(pointer:coarse){.global-chat-facade>a{min-height:44px;display:inline-flex;align-items:center}}
