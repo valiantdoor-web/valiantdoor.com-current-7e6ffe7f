@@ -102,6 +102,37 @@ intents = json.loads((ROOT / "data/page_intents.json").read_text(encoding="utf-8
 if not any(p.get("route") == "/nextdoor-emergency-repair" and p.get("include_in_sitemap") for p in intents):
     fail("page-intent sitemap generator must retain the urgent repair request URL")
 
+# The blog hub is rendered by /api/blog, not a static public/blog/index.html.
+blog_url = "https://www.valiantdoor.com/blog"
+blog_html = (ROOT / "lib/blog-index.html").read_text(encoding="utf-8")
+if re.findall(r"""<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["']""", blog_html, re.I) != [blog_url]:
+    fail("blog hub template must remain self-canonical")
+if re.search(r"""<meta[^>]+name=["'](?:robots|googlebot)["'][^>]+content=["'][^"']*noindex""", blog_html, re.I):
+    fail("blog hub template must remain indexable")
+pages_sitemap = ET.parse(PUBLIC / "sitemap-pages.xml").getroot()
+if [node.text for node in pages_sitemap.findall("{*}url/{*}loc")].count(blog_url) != 1:
+    fail("blog hub must appear exactly once in the pages sitemap")
+if 'href="/blog"' not in site_map:
+    fail("HTML site map must retain the blog hub discovery link")
+if not any(p.get("route") == "/blog" and p.get("include_in_sitemap") for p in intents):
+    fail("page-intent sitemap generator must retain the blog hub")
+
+# Index lastmod describes the child sitemap, not its pages or the deployment.
+# Four stale August dates were removed rather than replaced with invented dates.
+# Portfolio's retained date is supported by commit d596bc3c07ec8704f6bd20c0f014f02bb070da55.
+# Add other dates here only alongside a reliable child-sitemap modification source.
+index_root = ET.parse(PUBLIC / "sitemap.xml").getroot()
+index_names = ["pages", "blog", "images", "video", "portfolio"]
+expected_index_urls = [f"https://www.valiantdoor.com/sitemap-{name}.xml" for name in index_names]
+if [node.text for node in index_root.findall("{*}sitemap/{*}loc")] != expected_index_urls:
+    fail("sitemap index must retain all five child sitemap locations in order")
+verified_index_dates = {expected_index_urls[-1]: "2026-10-09"}
+for child in index_root.findall("{*}sitemap"):
+    location = child.findtext("{*}loc")
+    lastmod = child.findtext("{*}lastmod")
+    if lastmod is not None and lastmod != verified_index_dates.get(location):
+        fail(f"{location}: index lastmod requires verified child-sitemap modification provenance")
+
 # Internal links should point to the canonical no-slash path, not the typo or slash variant.
 for path in PUBLIC.rglob("*.html"):
     rel = path.relative_to(ROOT)
