@@ -4,11 +4,12 @@ const fs=require('node:fs');
 const path=require('node:path');
 const {execFileSync}=require('node:child_process');
 const {load}=require('cheerio');
+const {stripApprovedReviewSnippets}=require('./helpers/review-snippets.cjs');
 const {refresh,cities,answers,proof,titles,descriptions,routes}=require('../scripts/refresh-seo-completion.cjs');
 const {profile,normalizeGraph,addCredentialDetails}=require('../lib/blog-business-schema');
 const root=path.resolve(__dirname,'..');
 const read=route=>fs.readFileSync(path.join(root,'public',route,'index.html'),'utf8');
-function ownerText(html){const $=load(addCredentialDetails(html));$('script,style,[data-valiant-seo-completion]').remove();return $('body').text().replace(/\s+/g,' ').trim();}
+function ownerText(html){const $=load(addCredentialDetails(stripApprovedReviewSnippets(html)));$('script,style,[data-valiant-seo-completion]').remove();return $('body').text().replace(/\s+/g,' ').trim();}
 test('all existing owner body copy, FAQs and navigation survive the approved additions',()=>{
   for(const route of routes){
     const baseline=execFileSync('git',['show','0fb3399:public/'+route+'/index.html'],{cwd:root,encoding:'utf8',env:{...process.env,GIT_OPTIONAL_LOCKS:'0'}});

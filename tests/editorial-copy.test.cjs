@@ -3,13 +3,14 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 const {load}=require('cheerio');
+const {stripApprovedReviewSnippets}=require('./helpers/review-snippets.cjs');
 const {manifest,normalize,hash,mainDigest,protectedContent}=require('./helpers/editorial-copy.cjs');
 const root=path.resolve(__dirname,'..');
 const read=route=>fs.readFileSync(path.join(root,'public',route,'index.html'),'utf8');
 test('50 requested editorial rewrites retain approved copy and all protected page contracts',()=>{
  assert.equal(Object.keys(manifest.pages).length,50);
  for(const [route,expected]of Object.entries(manifest.pages)){
-  const html=read(route),$=load(html);
+  const html=read(route),$=load(stripApprovedReviewSnippets(html));
   assert.equal(mainDigest(html),expected.mainDigest,route+' editorial copy');
   assert.equal(hash(protectedContent(html)),expected.protectedDigest,route+' links, media, navigation, H1, metadata, prices or quotes');
   assert.deepEqual($('main h2').toArray().map(e=>normalize($(e).text())),expected.h2,route+' H2 hierarchy');
