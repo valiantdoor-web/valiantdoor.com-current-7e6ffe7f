@@ -224,6 +224,11 @@
       "permanent": true
     },
     {
+      "source": "/emergency-garage-door-repair-pleasanton",
+      "destination": "/emergency-garage-door-repair",
+      "permanent": true
+    },
+    {
       "source": "/emergency-repair",
       "destination": "/emergency-garage-door-repair",
       "permanent": true
