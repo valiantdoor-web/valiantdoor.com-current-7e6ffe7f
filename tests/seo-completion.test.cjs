@@ -11,7 +11,8 @@ const read=route=>fs.readFileSync(path.join(root,'public',route,'index.html'),'u
 function ownerText(html){const $=load(addCredentialDetails(html));$('script,style,[data-valiant-seo-completion]').remove();return $('body').text().replace(/\s+/g,' ').trim();}
 test('all existing owner body copy, FAQs and navigation survive the approved additions',()=>{
   for(const route of routes){
-    const baseline=execFileSync('git',['show','0fb3399:public/'+route+'/index.html'],{cwd:root,encoding:'utf8',env:{...process.env,GIT_OPTIONAL_LOCKS:'0'}});
+    // The approved address release retains the owner copy, including the new footer address.
+    const baseline=execFileSync('git',['show','d307a528c6247a931ff96db4a667cacdfbc0a113:public/'+route+'/index.html'],{cwd:root,encoding:'utf8',env:{...process.env,GIT_OPTIONAL_LOCKS:'0'}});
     assert.equal(ownerText(read(route)),ownerText(baseline),route);
     const $=load(read(route)),old=load(baseline);
     assert.equal($('h1').length,1,route);
