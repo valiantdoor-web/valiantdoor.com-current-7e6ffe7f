@@ -16,7 +16,7 @@ Every agent must read this file before pushing or deploying anything related to 
 
 The owner confirmed these decisions directly; they supersede conflicting older SEO audit notes:
 
-- **Hours and address:** 3588 Pimlico Dr, Pleasanton, CA 94588 is a staffed storefront. Storefront and phone-answering hours are **24/7**. Keep the address visible. These facts no longer need approval before implementing the related SEO fixes.
+- **Hours and address:** The current storefront address, updated November 26, 2026, is 7059 Commerce Circle Suite L, Pleasanton, CA 94588. The owner confirmed **24/7** storefront and phone-answering hours on October 25, 2026. Keep the address visible. These facts no longer need approval before implementing the related SEO fixes.
 - **Nextdoor landing page:** `https://www.valiantdoor.com/nextdoor-emergency-repair` **stays indexable and self-canonical**. Preserve its XML sitemap inclusion, HTML site-map link, page-intent sitemap flag, and existing internal discovery links. Do not restore the older `noindex` policy, consolidate its canonical, or redirect the page away without a new explicit owner decision.
 - **Verification:** retain the protections in `scripts/validate_indexing_contract.py`; run `npm run validate:indexing` and check the live HTTP status, canonical, robots directives, XML sitemap inclusion, and human-facing discovery links before claiming the policy is verified. Indexable does not mean Google or Bing has indexed or ranked the page.
 - **Limits:** 24/7 hours do not guarantee immediate technician dispatch. Preserve the published technician/route/parts availability conditions and after-hours service-charge policy. These decisions do not complete unrelated issue acceptance criteria or prove call/booking delivery.

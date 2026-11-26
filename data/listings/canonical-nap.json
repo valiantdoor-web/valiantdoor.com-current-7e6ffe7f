@@ -1,5 +1,5 @@
 {
-  "version": "2026-06-22",
+  "version": "2026-11-26",
   "business": {
     "name": "Valiant Garage Door",
     "legalName": "Valiant Garage Door LLC",
@@ -9,15 +9,15 @@
     "displayPhone": "(925) 409-4974",
     "email": "vm@valiantdoor.com",
     "address": {
-      "street": "3588 Pimlico Dr",
+      "street": "7059 Commerce Circle Suite L",
       "city": "Pleasanton",
       "region": "CA",
       "postalCode": "94588",
       "country": "US"
     },
     "geo": {
-      "latitude": 37.6980775,
-      "longitude": -121.8631748
+      "latitude": 37.6992696,
+      "longitude": -121.9157973
     },
     "placeIds": {
       "google": "ChIJreu0MBcWcgMRQnyWHvhS94w"
@@ -53,7 +53,7 @@
       "https://www.valiantdoor.com/"
     ],
     "bookingUrl": "https://www.valiantdoor.com/quote",
-    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Valiant%20Garage%20Door%203588%20Pimlico%20Dr%20Pleasanton%20CA%2094588&query_place_id=ChIJreu0MBcWcgMRQnyWHvhS94w",
+    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Valiant%20Garage%20Door%207059%20Commerce%20Circle%20Suite%20L%20Pleasanton%20CA%2094588&query_place_id=ChIJreu0MBcWcgMRQnyWHvhS94w",
     "socialProfiles": {
       "x": {
         "handle": "@vmsoslick",
