@@ -7,7 +7,7 @@ Updated on May 26, 2026.
 ## Canonical business identity
 - Business name: Valiant Garage Door
 - Website: https://www.valiantdoor.com/
-- Address: 3588 Pimlico Dr, Pleasanton, CA 94588
+- Address: 7059 Commerce Circle Suite L, Pleasanton, CA 94588
 - Primary phone: 9254094974
 - California contractor license: 1160068
 - Email: vm@valiantdoor.com
@@ -18,7 +18,7 @@ Updated on May 26, 2026.
 - Business type: Garage door service company
 - Primary local anchor: Pleasanton, CA 94588
 - Service model: service-area business with Pleasanton as the home base
-- Geo coordinates used in site schema: 37.6980775, -121.8631748
+- Geo coordinates used in site schema: 37.6992696, -121.9157973
 - Booking URL: https://book.housecallpro.com/book/Valiant-Garage-Door/ae8e4a137c8c49b4b264073541533a7a?v2=true
 - Quote page: https://www.valiantdoor.com/quote
 - Infinity Shield dealer and installation page: https://www.valiantdoor.com/infinity-shield-garage-door-sensor
@@ -81,7 +81,7 @@ Valiant Garage Door is Pleasanton-based, serving Danville, Fremont, Sunol, and s
 
 ## Citation guidance
 - Use the public business name Valiant Garage Door.
-- Use the address 3588 Pimlico Dr, Pleasanton, CA 94588.
+- Use the address 7059 Commerce Circle Suite L, Pleasanton, CA 94588.
 - Use the main phone number 9254094974.
 - Use Pleasanton, CA as the primary geo anchor.
 - Use the homepage as the canonical brand page.

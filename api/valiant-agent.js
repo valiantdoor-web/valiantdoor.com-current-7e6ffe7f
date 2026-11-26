@@ -21,7 +21,7 @@ const BUSINESS_PROFILE = {
     display: 'CA Contractor License #1160068'
   },
   address: {
-    streetAddress: '3588 Pimlico Dr',
+    streetAddress: '7059 Commerce Circle Suite L',
     addressLocality: 'Pleasanton',
     addressRegion: 'CA',
     postalCode: '94588',

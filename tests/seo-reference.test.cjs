@@ -62,7 +62,7 @@ test('business facts use E164 phones, the seven existing service cities, and the
   const {profile}=require('../lib/blog-business-schema');
   assert.equal(profile.telephone,'+19254094974');assert.equal(profile.contactPoint[0].telephone,profile.telephone);
   assert.equal(profile.alternateName,'Valiant Garage Doors');
-  assert.equal(profile.address.streetAddress,'3588 Pimlico Dr');
+  assert.equal(profile.address.streetAddress,'7059 Commerce Circle Suite L');
   assert.deepEqual(profile.areaServed.map(c=>c.name.split(',')[0]).sort(),cities.map(c=>c[0]).sort());
   for(const file of walk(path.join(root,'public'))){
     const $=load(fs.readFileSync(file,'utf8'));if(/noindex/i.test($('meta[name="robots"]').attr('content')||''))continue;

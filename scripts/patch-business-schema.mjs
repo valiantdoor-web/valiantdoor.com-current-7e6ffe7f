@@ -21,7 +21,7 @@ const DRY = process.argv.includes("--dry-run");
 const CANON = {
   image: "https://www.valiantdoor.com/assets/home-optimized/shield-192.webp",
   priceRange: "$$",
-  geo: { "@type": "GeoCoordinates", latitude: 37.6980775, longitude: -121.8631748 },
+  geo: { "@type": "GeoCoordinates", latitude: 37.6992696, longitude: -121.9157973 },
 };
 
 const BIZ = /GarageDoor|LocalBusiness|HomeAndConstruction/;

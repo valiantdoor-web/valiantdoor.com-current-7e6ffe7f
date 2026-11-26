@@ -106,7 +106,7 @@ for p in pages:
     business=[n for n in nodes(p.blocks) if any(t in ['LocalBusiness','HomeAndConstructionBusiness','GarageDoorService'] for t in types(n))]
     if len(business)!=1: ERRORS.append(f'{r}: {len(business)} typed business definitions')
     for b in business:
-        if b.get('@id')!=BID or b.get('address',{}).get('streetAddress')!='3588 Pimlico Dr': ERRORS.append(f'{r}: wrong or incomplete business identity/address')
+        if b.get('@id')!=BID or b.get('address',{}).get('streetAddress')!='7059 Commerce Circle Suite L': ERRORS.append(f'{r}: wrong or incomplete business identity/address')
         if b.get('hasCredential',{}).get('identifier')!='1160068': ERRORS.append(f'{r}: missing CSLB credential')
         if b.get('hasCertification',{}).get('certificationIdentification')!='2953': ERRORS.append(f'{r}: missing Diamond certificate')
         props=json.dumps(b.get('additionalProperty',[]))
