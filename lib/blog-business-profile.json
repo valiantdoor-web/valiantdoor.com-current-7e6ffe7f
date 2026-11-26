@@ -12,8 +12,8 @@
   "description": "Pleasanton-based garage door repair, spring replacement, opener service, maintenance, new door installation and commercial garage door service across the Tri-Valley and nearby East Bay communities.",
   "logo": "https://www.valiantdoor.com/assets/logo/valiant-logo-gold.png",
   "image": "https://www.valiantdoor.com/assets/home-optimized/shield-192.webp",
-  "address": {"@type": "PostalAddress", "streetAddress": "3588 Pimlico Dr", "addressLocality": "Pleasanton", "addressRegion": "CA", "postalCode": "94588", "addressCountry": "US"},
-  "geo": {"@type": "GeoCoordinates", "latitude": 37.6980775, "longitude": -121.8631748},
+  "address": {"@type": "PostalAddress", "streetAddress": "7059 Commerce Circle Suite L", "addressLocality": "Pleasanton", "addressRegion": "CA", "postalCode": "94588", "addressCountry": "US"},
+  "geo": {"@type": "GeoCoordinates", "latitude": 37.6992696, "longitude": -121.9157973},
   "areaServed": [
     {"@type": "City", "name": "Pleasanton, CA"},
     {"@type": "City", "name": "Dublin, CA"},
@@ -24,7 +24,7 @@
     {"@type": "City", "name": "Sunol, CA"}
   ],
   "sameAs": [
-    "https://www.google.com/maps/search/?api=1&query=Valiant%20Garage%20Door%203588%20Pimlico%20Dr%20Pleasanton%20CA%2094588&query_place_id=ChIJreu0MBcWcgMRQnyWHvhS94w",
+    "https://www.google.com/maps/search/?api=1&query=Valiant%20Garage%20Door%207059%20Commerce%20Circle%20Suite%20L%20Pleasanton%20CA%2094588&query_place_id=ChIJreu0MBcWcgMRQnyWHvhS94w",
     "https://www.yelp.com/biz/valiant-garage-door-pleasanton",
     "https://www.instagram.com/valiantgaragedoor",
     "https://www.linkedin.com/company/valiant-garage-door",
@@ -36,7 +36,7 @@
     "https://nextdoor.com/page/valiant-garage-door-pleasanton/",
     "https://www.diamondcertified.org/report/valiant-garage-door/"
   ],
-  "hasMap": "https://www.google.com/maps/search/?api=1&query=Valiant%20Garage%20Door%203588%20Pimlico%20Dr%20Pleasanton%20CA%2094588&query_place_id=ChIJreu0MBcWcgMRQnyWHvhS94w",
+  "hasMap": "https://www.google.com/maps/search/?api=1&query=Valiant%20Garage%20Door%207059%20Commerce%20Circle%20Suite%20L%20Pleasanton%20CA%2094588&query_place_id=ChIJreu0MBcWcgMRQnyWHvhS94w",
   "identifier": {"@type": "PropertyValue", "propertyID": "California CSLB contractor license", "value": "1160068"},
   "hasCredential": {
     "@type": "EducationalOccupationalCredential",

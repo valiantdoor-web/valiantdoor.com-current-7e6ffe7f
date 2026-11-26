@@ -16,7 +16,7 @@ test('an imported provider stub resolves to one complete company without changin
   {'@type':'Service',name:'Repair',provider:{'@type':'LocalBusiness',name:'Valiant Garage Door LLC'}}
  ]}]);
  const businesses=graph['@graph'].filter(n=>[n['@type']].flat().includes('LocalBusiness'));
- assert.equal(businesses.length,1);assert.equal(businesses[0].address.streetAddress,'3588 Pimlico Dr');
+ assert.equal(businesses.length,1);assert.equal(businesses[0].address.streetAddress,'7059 Commerce Circle Suite L');
  assert.equal(businesses[0].makesOffer[0].price,'149');
  assert.deepEqual(graph['@graph'].find(n=>n['@type']==='Service').provider,{'@id':profile['@id']});
 });

@@ -1073,7 +1073,7 @@ const createValiantBotFallbackReply = (messageText) => {
 
   // Contact
   if (/\b(contact|phone|call|number|email|reach|address)\b/.test(t)) {
-    return "Call Valiant Garage Door at " + VALIANT_PHONE + "\nEmail: vm@valiantdoor.com\nAddress: 3588 Pimlico Dr, Pleasanton, CA 94588\nBook online: " + HCP_BOOK_URL;
+    return "Call Valiant Garage Door at " + VALIANT_PHONE + "\nEmail: vm@valiantdoor.com\nAddress: 7059 Commerce Circle Suite L, Pleasanton, CA 94588\nBook online: " + HCP_BOOK_URL;
   }
 
   // Default / general

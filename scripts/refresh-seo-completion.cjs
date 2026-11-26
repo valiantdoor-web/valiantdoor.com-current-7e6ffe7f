@@ -7,7 +7,7 @@ const base = 'https://www.valiantdoor.com';
 const {cities} = require('./refresh-seo-reference.cjs');
 const answers = {
   Fremont: 'For a stuck door, failed opener, or broken spring in Fremont, Valiant Garage Door starts with diagnosis and an itemized recommendation. Call (925) 409-4974 or book an estimate online. California contractor license #1160068 covers the business; phone requests are answered 24/7, while dispatch depends on technician, route, and parts availability.',
-  Pleasanton: 'Valiant Garage Door is based at a staffed Pleasanton storefront at 3588 Pimlico Dr. We handle broken springs, opener faults, cables, and off-track doors under California contractor license #1160068. Call (925) 409-4974 or book online; storefront and phone hours are 24/7, with technician dispatch confirmed separately according to availability.',
+  Pleasanton: 'Valiant Garage Door is based at a staffed Pleasanton storefront at 7059 Commerce Circle Suite L. We handle broken springs, opener faults, cables, and off-track doors under California contractor license #1160068. Call (925) 409-4974 or book online; storefront and phone hours are 24/7, with technician dispatch confirmed separately according to availability.',
   'San Ramon': 'Need a garage door diagnosed in San Ramon? Valiant Garage Door handles spring, cable, track, and opener problems, with pricing explained before approved work. Reach the team at (925) 409-4974 or book an estimate online. CSLB #1160068; phone answering is available 24/7, and dispatch depends on route, technician, and parts availability.',
   Dublin: 'Dublin homeowners can contact Valiant Garage Door for broken springs, enclosed-spring conversions, noisy openers, and off-track doors. The Dublin spring-service and documented-project links below help explain the options before booking. Call (925) 409-4974 or request an estimate online. CSLB #1160068; phones are answered 24/7, with dispatch confirmed by availability.',
   Livermore: 'For Livermore garage door service, Valiant Garage Door checks the door, hardware, and opener before recommending repairs. Published starting prices below are a guide, not a substitute for diagnosis. Book an estimate online or call (925) 409-4974, answered 24/7. CSLB #1160068; technician dispatch depends on route, parts, and availability.',
@@ -82,7 +82,7 @@ function refresh() {
       const system=route==='garage-door-openers'?'garage door opener installation and repair':'Infinity Shield compatibility checks and installation';
       html=afterHero(html,section('local-service',`<h2>${route==='garage-door-openers'?'Garage door opener service':'Infinity Shield installation'} in Pleasanton &amp; the Tri-Valley</h2><p>Valiant Garage Door provides ${system} in ${cities.map(c=>escape(c[0])).join(', ')}. The staffed Pleasanton storefront and phone line are open 24/7. Technician dispatch depends on route, parts, and availability. CSLB #1160068.</p><p><a href="/quote">In the Bay Area? Book a technician estimate</a> · <a href="tel:+19254094974">Call (925) 409-4974</a>.</p>`));
     }
-    if(['quote','google-business-profile'].includes(route)) html=afterHero(html,section('hours',`<h2>Staffed Pleasanton storefront and phone: open 24/7</h2><p>3588 Pimlico Dr, Pleasanton, CA 94588. Owner-confirmed storefront and phone-answering hours: 24 hours a day, seven days a week. Dispatch depends on technician, route, and parts availability; published after-hours charges remain in effect.</p><p><a href="tel:+19254094974">Call (925) 409-4974</a> · <a href="/quote">Request a service estimate</a>.</p>`));
+    if(['quote','google-business-profile'].includes(route)) html=afterHero(html,section('hours',`<h2>Staffed Pleasanton storefront and phone: open 24/7</h2><p>7059 Commerce Circle Suite L, Pleasanton, CA 94588. Owner-confirmed storefront and phone-answering hours: 24 hours a day, seven days a week. Dispatch depends on technician, route, and parts availability; published after-hours charges remain in effect.</p><p><a href="tel:+19254094974">Call (925) 409-4974</a> · <a href="/quote">Request a service estimate</a>.</p>`));
     if(route==='service-areas') {
       const $=load(html),targets=[['Our Core Service Areas In The East Bay','core-service-cities'],['Valiant Live Projects Map','live-projects-map']];
       for(const [heading,id]of targets) {
@@ -102,7 +102,7 @@ function refresh() {
     if(html!==before){fs.writeFileSync(file,html);changed++;}
   }
   const file=path.join(root,'public/llms.txt'),before=fs.readFileSync(file,'utf8');
-  if(!before.includes('- Staffed storefront and phone hours:')){fs.writeFileSync(file,before.replace(/(- Emergency availability:[^\n]*)/,(_,line)=>line+'\n- Staffed storefront and phone hours: open 24/7 at 3588 Pimlico Dr, Pleasanton, CA 94588 (owner confirmed October 25, 2026). Technician dispatch remains subject to availability.'));changed++;}
+  if(!before.includes('- Staffed storefront and phone hours:')){fs.writeFileSync(file,before.replace(/(- Emergency availability:[^\n]*)/,(_,line)=>line+'\n- Staffed storefront and phone hours: open 24/7 at 7059 Commerce Circle Suite L, Pleasanton, CA 94588 (owner confirmed October 25, 2026). Technician dispatch remains subject to availability.'));changed++;}
   return changed;
 }
 if(require.main===module)console.log(`SEO completion additions refreshed in ${refresh()} files.`);
