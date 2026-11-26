@@ -13,7 +13,8 @@ test('SEO additions preserve earlier copy except the explicit 2026-10-25 editori
   const routes=new Set([...areaSources,...Object.keys(titles),...guides.keys()]);
   for(const route of routes){
     const relative='public/'+(route?route+'/':'')+'index.html';
-    const original=execFileSync('git',['show','2803ee7:'+relative],{cwd:root,encoding:'utf8',env:{...process.env,GIT_OPTIONAL_LOCKS:'0'}});
+    // The approved address release retains the owner copy, including the new footer address.
+    const original=execFileSync('git',['show','d307a528c6247a931ff96db4a667cacdfbc0a113:'+relative],{cwd:root,encoding:'utf8',env:{...process.env,GIT_OPTIONAL_LOCKS:'0'}});
     // Compare to the existing build pipeline's credential rendering, not a
     // stale checked-in copy of those generated details.
     const {addCredentialDetails}=require('../lib/blog-business-schema');
