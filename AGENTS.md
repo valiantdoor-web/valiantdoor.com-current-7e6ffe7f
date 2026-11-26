@@ -13,7 +13,7 @@ Hard rules:
 
 ## Owner-confirmed SEO decisions — 2026-10-25 (America/Los_Angeles)
 
-- The storefront at 3588 Pimlico Dr, Pleasanton, CA 94588 is staffed. The owner confirmed storefront and phone-answering hours are 24/7. Keep the address visible; do not treat these hours as an unresolved approval blocker.
+- The owner confirmed 24/7 storefront and phone-answering hours on October 25, 2026. The current storefront address, updated November 26, 2026, is 7059 Commerce Circle Suite L, Pleasanton, CA 94588. Keep the address visible; do not treat these hours as an unresolved approval blocker.
 - `/nextdoor-emergency-repair` stays indexable with its own canonical URL. Preserve its XML sitemap inclusion, HTML site-map link, and existing internal discovery links. Do not add `noindex`, canonicalize it to another page, redirect it away, or remove its discovery paths based on the older SEO audit.
 - These owner decisions supersede older Notion/Linear audit statements that the hours are unconfirmed or that the Nextdoor landing page should remain `noindex`. They do not mark the other acceptance criteria in those issues complete.
 - Preserve the existing indexing regression checks in `scripts/validate_indexing_contract.py`. Run `npm run validate:indexing` and verify the live page's status, canonical, robots directives, and sitemap/discovery links before reporting its indexing policy as verified.
