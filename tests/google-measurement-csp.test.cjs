@@ -13,7 +13,7 @@ test('Google diagnostic endpoints are allowed only in connect-src', () => {
   assert.equal(h.value.split(origin).length - 1, 1);
  }
 });
-test('all other policy directives and config remain unchanged except the explicit Vercel-host noindex rule', () => {
+test('other config matches the baseline with the preview noindex rule and restored Pleasanton emergency redirect', () => {
  const copy = structuredClone(config);
  const preview = copy.headers.pop();
  assert.deepEqual(preview, {
@@ -22,5 +22,13 @@ test('all other policy directives and config remain unchanged except the explici
  });
  const h = copy.headers.flatMap(rule => rule.headers).find(h => h.key === 'Content-Security-Policy');
  for (const origin of origins) h.value = h.value.replace(' '+origin, '');
- assert.deepEqual(copy, baseline);
+ const expected = structuredClone(baseline);
+ const emergencyAlias = expected.redirects.findIndex(rule => rule.source === '/emergency-repair');
+ assert.notEqual(emergencyAlias, -1);
+ expected.redirects.splice(emergencyAlias, 0, {
+  source: '/emergency-garage-door-repair-pleasanton',
+  destination: '/emergency-garage-door-repair',
+  permanent: true
+ });
+ assert.deepEqual(copy, expected);
 });
